@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity createuser(@RequestBody RequestUser user){
+    public ResponseEntity createUser(@RequestBody RequestUser user){
         ModelMapper mapper = new ModelMapper();
 //        변환 객체간 필드 명이 정확이 일치해야함
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
