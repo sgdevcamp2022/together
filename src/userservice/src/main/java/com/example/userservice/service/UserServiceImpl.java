@@ -29,6 +29,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userRepository.existsUserEntityByEmail(userDto.getEmail()))
+            throw new IllegalArgumentException("이미 가입된 email입니다.");
+
         userDto.setUserId(UUID.randomUUID().toString());
 
         ModelMapper mapper = new ModelMapper();
