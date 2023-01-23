@@ -45,4 +45,14 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
     }
+
+    @PostMapping("/user/{id}")
+    public ResponseEntity<ResponseUser> updateUser(@PathVariable("id") String userId,
+                                                   @RequestBody RequestUser userInfo) {
+        UserDto userDto = userService.updateUser(userId, userInfo);
+
+        ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
+
+        return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+    }
 }

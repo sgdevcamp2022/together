@@ -3,6 +3,7 @@ package com.example.userservice.service;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.vo.RequestUser;
 import com.sun.xml.bind.v2.TODO;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -53,6 +54,24 @@ public class UserServiceImpl implements UserService {
 
 //        TODO 사용자 추가 정보(채널, 친구 목록 등) 가져와서 userDto에 추가
 
+
+        return userDto;
+    }
+
+    @Override
+    public UserDto updateUser(String userId, RequestUser userInfo) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
+
+        userEntity.setName(userInfo.getName());
+        userEntity.setEmail(userInfo.getEmail());
+        userEntity.setEncryptedPwd(userInfo.getPwd());
+
+        userRepository.save(userEntity);
+
+        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
 
         return userDto;
     }
