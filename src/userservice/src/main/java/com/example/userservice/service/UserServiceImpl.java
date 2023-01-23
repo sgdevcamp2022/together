@@ -4,7 +4,6 @@ import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.RequestUser;
-import com.sun.xml.bind.v2.TODO;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -45,10 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByUserId(String userId) {
-        UserEntity userEntity = userRepository.findByUserId(userId);
-
-        if (userEntity == null)
-            throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
+        UserEntity userEntity = checkValidUser(userId);
 
         UserDto userDto = new ModelMapper().map(userEntity,UserDto.class);
 
@@ -60,10 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(String userId, RequestUser userInfo) {
-        UserEntity userEntity = userRepository.findByUserId(userId);
-
-        if (userEntity == null)
-            throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
+        UserEntity userEntity = checkValidUser(userId);
 
         userEntity.setName(userInfo.getName());
         userEntity.setEmail(userInfo.getEmail());
@@ -78,11 +71,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
+        UserEntity userEntity = checkValidUser(userId);
+
+        userRepository.delete(userEntity);
+    }
+
+    private UserEntity checkValidUser(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId);
 
         if (userEntity == null)
             throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
-
-        userRepository.delete(userEntity);
+        return userEntity;
     }
 }
