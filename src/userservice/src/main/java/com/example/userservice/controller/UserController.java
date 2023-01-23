@@ -29,7 +29,8 @@ public class UserController {
 //        변환 객체간 필드 명이 정확이 일치해야함
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        UserDto userDto = mapper.map(user, UserDto.class);
+        UserDto userDto = mapper.map
+                (user, UserDto.class);
         userService.createUser(userDto);
 
         ResponseUser responseUser = mapper.map(userDto, ResponseUser.class);
@@ -54,5 +55,12 @@ public class UserController {
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+    }
+
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity deleteUser(@PathVariable("id") String userId) {
+        userService.deleteUser(userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body("사용자 삭제 완료" + userId);
     }
 }

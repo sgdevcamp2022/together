@@ -25,4 +25,6 @@ public interface UserService {
      * userID와 변경할 유저 정보로 유저 정보 업데이트
      */
     UserDto updateUser(String userId, RequestUser userInfo);
+
+    void deleteUser(String userId);
 }

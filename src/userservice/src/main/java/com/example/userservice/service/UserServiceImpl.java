@@ -75,4 +75,14 @@ public class UserServiceImpl implements UserService {
 
         return userDto;
     }
+
+    @Override
+    public void deleteUser(String userId) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+
+        if (userEntity == null)
+            throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
+
+        userRepository.delete(userEntity);
+    }
 }
