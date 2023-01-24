@@ -79,6 +79,11 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(userEntity);
     }
 
+    @Override
+    public Iterable<UserEntity> getAllUser() {
+        return userRepository.findAll();
+    }
+
     private UserEntity checkValidUser(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId);
 

@@ -1,6 +1,7 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.repository.UserEntity;
 import com.example.userservice.service.UserService;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseUser;
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("")
@@ -62,5 +66,17 @@ public class UserController {
         userService.deleteUser(userId);
 
         return ResponseEntity.status(HttpStatus.OK).body("사용자 삭제 완료" + userId);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<ResponseUser>> getUsers() {
+        Iterable<UserEntity> userList = userService.getAllUser();
+
+        List<ResponseUser> result = new ArrayList<>();
+        userList.forEach(v -> {
+            result.add(new ModelMapper().map(v, ResponseUser.class));
+        });
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

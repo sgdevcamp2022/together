@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.repository.UserEntity;
 import com.example.userservice.vo.RequestUser;
 
 public interface UserService {
@@ -27,4 +28,6 @@ public interface UserService {
     UserDto updateUser(String userId, RequestUser userInfo);
 
     void deleteUser(String userId);
+
+    Iterable<UserEntity> getAllUser();
 }
