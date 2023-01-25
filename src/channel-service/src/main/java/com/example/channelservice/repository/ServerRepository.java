@@ -2,7 +2,9 @@ package com.example.channelservice.repository;
 
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.Optional;
+
 public interface ServerRepository extends CrudRepository<ServerEntity, Long> {
-    Iterable<ServerEntity> findByUserId(String userId);
-    ServerEntity findByServerId(String serverId);
+    Optional<Iterable<ServerEntity>> findByUserId(String userId);
+    Optional<ServerEntity> findByServerId(String serverId);
 }

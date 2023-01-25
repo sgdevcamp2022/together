@@ -8,6 +8,8 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,12 +36,12 @@ public class ServerServiceImpl implements ServerService{
 
     @Override
     public Iterable<ServerEntity> getServersByUserId(String userId) {
-        return serverRepository.findByUserId(userId);
+        return serverRepository.findByUserId(userId).orElseThrow(()-> new NoSuchElementException());
     }
 
     @Override
     public ServerDto getServerByServerId(String serverId) {
-        ServerEntity serverEntity = serverRepository.findByServerId(serverId);
+        Optional<ServerEntity> serverEntity = serverRepository.findByServerId(serverId);
         ServerDto serverDto = new ModelMapper().map(serverEntity, ServerDto.class);
 
         return serverDto;
