@@ -24,4 +24,6 @@ public class ServerEntity {
 
     @OneToMany(mappedBy = "server")
     private List<ChannelEntity> channelList = new ArrayList<>();
+    @OneToMany(mappedBy = "server")
+    private List<UserServer> userServers = new ArrayList<>();
 }
