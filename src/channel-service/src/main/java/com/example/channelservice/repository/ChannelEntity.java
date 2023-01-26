@@ -3,25 +3,25 @@ package com.example.channelservice.repository;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "server")
-public class ServerEntity {
+@Table(name = "channel")
+public class ChannelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SERVER_ID")
+    @Column(name = "CHANNEL_ID")
     private Long id;
 
     @Column(nullable = false, length = 20)
     private String name;
     @Column(nullable = false, length = 20)
     private String Info;
+    @Column(nullable = false)
+    private Integer type;
 
-    @OneToMany(mappedBy = "server")
-    private List<ChannelEntity> channelList = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "SERVER_ID")
+    private ServerEntity server;
+
 }
