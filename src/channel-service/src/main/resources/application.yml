@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: order-service
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
   h2:
     console:
       enabled: true

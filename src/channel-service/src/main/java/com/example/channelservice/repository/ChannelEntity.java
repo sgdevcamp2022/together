@@ -1,12 +1,13 @@
 package com.example.channelservice.repository;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Data
 @Entity
 @Table(name = "channel")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class ChannelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +17,7 @@ public class ChannelEntity {
     @Column(nullable = false, length = 20)
     private String name;
     @Column(nullable = false, length = 20)
-    private String Info;
+    private String info;
     @Column(nullable = false)
     private Integer type;
 
@@ -24,4 +25,26 @@ public class ChannelEntity {
     @JoinColumn(name = "SERVER_ID")
     private ServerEntity server;
 
+    @Builder
+    public ChannelEntity(String channelName,
+                         String channelInfo,
+                         Integer type,
+                         ServerEntity server){
+        this.name = channelName;
+        this.info = channelInfo;
+        this.type = type;
+        this.server = server;
+    }
+
+    public static ChannelEntity createChannel(String channelName,
+                                              String channelInfo,
+                                              Integer type,
+                                              ServerEntity server) {
+        return ChannelEntity.builder()
+                .channelName(channelName)
+                .channelInfo(channelInfo)
+                .type(type)
+                .server(server)
+                .build();
+    }
 }

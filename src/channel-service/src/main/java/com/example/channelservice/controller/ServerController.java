@@ -1,11 +1,14 @@
 package com.example.channelservice.controller;
 
+import com.example.channelservice.dto.ChannelDto;
 import com.example.channelservice.dto.ServerDto;
-import com.example.channelservice.repository.ServerEntity;
+import com.example.channelservice.service.ChannelService;
 import com.example.channelservice.service.ServerService;
 import com.example.channelservice.vo.RequestServer;
+import com.example.channelservice.vo.ResponseChannel;
 import com.example.channelservice.vo.ResponseServer;
-import com.netflix.discovery.converters.Auto;
+import com.example.channelservice.vo.ResponseServerDetail;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,37 +21,43 @@ import java.util.List;
 
 @RestController
 @RequestMapping("")
+@Slf4j
 public class ServerController {
     ServerService serverService;
+    ChannelService channelService;
 
     @Autowired
-    public ServerController(ServerService serverService){
+    public ServerController(ChannelService channelService, ServerService serverService){
+        this.channelService = channelService;
         this.serverService = serverService;
     }
 
-    @PostMapping("/{user_id}/servers")
-    public ResponseEntity<ResponseServer> createServer(@PathVariable("user_id") String userId,
-                                                       @RequestBody RequestServer serverDetails) {
+    @PostMapping("/server")
+    public ResponseEntity<ResponseServer> createServer(@RequestBody RequestServer serverDetails) {
+//        TODO 선행조건으로 만드는 유저를 UserInServer로 생성하기
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         ServerDto serverDto = mapper.map(serverDetails, ServerDto.class);
-        serverDto.setUserId(userId);
         ServerDto createdServer = serverService.createServer(serverDto);
 
         ResponseServer responseServer = mapper.map(createdServer, ResponseServer.class);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(responseServer);
     }
 
-    @GetMapping("/{user_id}/servers")
-    public ResponseEntity<List<ResponseServer>> getServer(@PathVariable("user_id") String userId) {
-        Iterable<ServerEntity> serverList = serverService.getServersByUserId(userId);
+    @GetMapping("server/{id}")
+    public ResponseEntity<ResponseServerDetail> getServer(@PathVariable("id") Long serverId) {
+        ServerDto server = serverService.getServerById(serverId);
 
-        List<ResponseServer> result = new ArrayList<>();
-        serverList.forEach(v -> {
-            result.add(new ModelMapper().map(v, ResponseServer.class));
+        ResponseServerDetail result = new ModelMapper().map(server, ResponseServerDetail.class);
+        List<ChannelDto> channelList = channelService.getChannelsByServerId(serverId);
+
+        List<ResponseChannel> channelRes = new ArrayList<>();
+        channelList.forEach(c ->{
+            channelRes.add(new ModelMapper().map(c, ResponseChannel.class));
         });
+
+        result.setChannelList(channelRes);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
