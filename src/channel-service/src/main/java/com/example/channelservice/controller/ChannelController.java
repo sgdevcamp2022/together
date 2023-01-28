@@ -34,4 +34,12 @@ public class ChannelController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseChannel);
         }
+
+        @DeleteMapping("/{server_id}/channel/{channel_name}")
+        public ResponseEntity<ResponseChannel> deleteChannel(@PathVariable("server_id") Long serverId,
+                                                             @PathVariable("channel_name") String channelName) {
+            ChannelDto channelDto = channelService.deleteChannel(serverId,channelName);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseChannel());
+        }
 }

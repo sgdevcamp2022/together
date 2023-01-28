@@ -7,4 +7,7 @@ import java.util.List;
 public interface ChannelService {
     ChannelDto createChannel(ChannelDto channelDetails, Long serverId);
     List<ChannelDto> getChannelsByServerId(Long serverId);
+
+    ChannelDto deleteChannel(Long serverId, String channelName);
+
 }

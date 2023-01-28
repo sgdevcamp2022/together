@@ -58,4 +58,15 @@ public class ChannelServiceImpl implements ChannelService{
         });
         return channelList;
     }
+
+    @Override
+    public ChannelDto deleteChannel(Long serverId, String channelName) {
+        ServerEntity server = serverRepository.findById(serverId).orElseThrow(()-> new NoSuchElementException());
+
+        server.deleteChannel(channelName);
+        log.info(channelName+"채널이 삭제됨");
+        serverRepository.save(server);
+
+        return null;
+    }
 }

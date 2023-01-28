@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "server")
@@ -21,11 +22,10 @@ public class ServerEntity {
     @Column(nullable = false, length = 20)
     private String info;
 
-    @OneToMany(mappedBy = "server",
-    cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL, orphanRemoval = true)
+    // TODO 지우거나 수정할 때 쉽게 찾으려 hashmap으로 변경할지 고민
     private List<ChannelEntity> channelList = new ArrayList<>();
-    @OneToMany(mappedBy = "server",
-    cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserServer> userServers = new ArrayList<>();
 
     @Builder
@@ -44,6 +44,19 @@ public class ServerEntity {
     public void addChannel(ChannelEntity channel) {
         this.channelList.add(channel);
     }
+    public void deleteChannel(String channelName) {
+        this.channelList.stream()
+                .filter(o->o.getName().equals(channelName))
+                .collect(Collectors.toList())
+                .forEach(li->{this.channelList.remove(li);});
+    }
 
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
 }

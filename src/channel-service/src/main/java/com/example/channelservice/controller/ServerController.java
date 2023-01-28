@@ -61,4 +61,22 @@ public class ServerController {
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
+    @DeleteMapping("server/{id}")
+    public ResponseEntity<ResponseServer> deleteServer(@PathVariable("id") Long serverId) {
+//        TODO 삭제할때는 연관 객체를 null하고 삭제해야함
+        ServerDto deletedServer = serverService.deleteServer(serverId);
+
+        ResponseServer responseServer = new ModelMapper().map(deletedServer, ResponseServer.class);
+        return ResponseEntity.status(HttpStatus.OK).body(responseServer);
+    }
+
+    @PostMapping("server/{id}")
+    public ResponseEntity<ResponseServer> updateServer(@PathVariable("id") Long serverId,
+                                                       @RequestBody RequestServer newServer) {
+        ServerDto updatedServer = serverService.updateServer(serverId, newServer);
+
+        ResponseServer responseServer = new ModelMapper().map(updatedServer, ResponseServer.class);
+        return ResponseEntity.status(HttpStatus.OK).body(responseServer);
+    }
 }
