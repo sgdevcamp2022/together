@@ -3,8 +3,9 @@ package com.example.userservice.service;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.vo.RequestUser;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     /**
      * @param userDto
      * @return
@@ -30,4 +31,6 @@ public interface UserService {
     void deleteUser(String userId);
 
     Iterable<UserEntity> getAllUser();
+
+    UserDto getUserDetailsByEmail(String email);
 }
