@@ -65,17 +65,25 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String userName = (((User)authResult.getPrincipal()).getUsername());
-        UserDto userDetails = userService.getUserDetailsByEmail(userName);
+        UserDto userDetails = userService.getUserByEmail(userName);
         log.debug(userDetails.toString());
 
-        String token = Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setSubject(userDetails.getUserId())
                 .setExpiration(new Date(System.currentTimeMillis() +
-                        Long.parseLong(env.getProperty("token.expiration_time"))))
+                        Long.parseLong(env.getProperty("token.access_expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
 
-        response.addHeader("token",token);
-        response.addHeader("userId",userDetails.getUserId());
+        String refreshToken = Jwts.builder()
+                .setSubject(userDetails.getEmail())
+                .setExpiration(new Date(System.currentTimeMillis() +
+                        Long.parseLong(env.getProperty("token.refresh_expiration_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
+                .compact();
+
+        response.addHeader("atk", accessToken);
+        response.addHeader("rtk", refreshToken);
+        response.addHeader("userId", userDetails.getUserId());
     }
 }

@@ -29,6 +29,7 @@ logging:
     com.example.userservice: DEBUG
 
 token:
-  expiration_time: 86400000
+  access_expiration_time: 86400000
   #  1day
+  refresh_expiration_time: 864000000
   secret: user_token
