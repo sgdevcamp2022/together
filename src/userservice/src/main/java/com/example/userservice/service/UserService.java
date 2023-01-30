@@ -18,7 +18,7 @@ public interface UserService extends UserDetailsService {
      * @return
      * userID(UUID)로 찾은 user 반환
      */
-    UserDto getUserByUserId(String userId);
+    UserDto getUserDetailsByUserId(String userId);
 
     /**
      * @param userId
@@ -32,5 +32,8 @@ public interface UserService extends UserDetailsService {
 
     Iterable<UserEntity> getAllUser();
 
-    UserDto getUserDetailsByEmail(String email);
+    void addFriend(String follower, String username);
+    void deleteFriend(String follower, String username);
+
+    UserDto getUserByEmail(String email);
 }

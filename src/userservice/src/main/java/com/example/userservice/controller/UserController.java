@@ -7,7 +7,6 @@ import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseUser;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +43,7 @@ public class UserController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<ResponseUser> getUser(@PathVariable("id") String userId) {
-        UserDto userDto = userService.getUserByUserId(userId);
+        UserDto userDto = userService.getUserDetailsByUserId(userId);
 
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
 
@@ -78,5 +77,25 @@ public class UserController {
         });
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PostMapping("/user/{my_email}/add/{user_email}")
+    public ResponseEntity<ResponseUser> addFriend(@PathVariable("user_email") String username,
+                                                  @PathVariable("my_email") String myemail) {
+        userService.addFriend(myemail,username);
+
+        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(myemail), ResponseUser.class);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/user/{my_email}/add/{user_email}")
+    public ResponseEntity<ResponseUser> deleteFriend(@PathVariable("user_email") String username,
+                                                  @PathVariable("my_email") String myemail) {
+        userService.deleteFriend(myemail,username);
+
+        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(myemail), ResponseUser.class);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

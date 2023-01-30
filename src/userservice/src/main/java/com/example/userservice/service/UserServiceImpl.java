@@ -1,6 +1,8 @@
 package com.example.userservice.service;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.repository.FriendEntity;
+import com.example.userservice.repository.FriendRepository;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.RequestUser;
@@ -20,14 +22,17 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
+    private final FriendRepository friendRepository;
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder){
+                           BCryptPasswordEncoder passwordEncoder,
+                           FriendRepository friendRepository){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.friendRepository = friendRepository;
     }
 
     @Override
@@ -49,12 +54,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByUserId(String userId) {
+    public UserDto getUserDetailsByUserId(String userId) {
         UserEntity userEntity = checkValidUser(userId);
 
         UserDto userDto = new ModelMapper().map(userEntity,UserDto.class);
-
+        log.info("followerList:"+userEntity.getFriendList().toString());
 //        TODO 사용자 추가 정보(채널, 친구 목록 등) 가져와서 userDto에 추가
+
 
 
         return userDto;
@@ -88,7 +94,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserDetailsByEmail(String email) {
+    public void addFriend(String myMail, String followerMail) {
+        UserEntity myInfo = userRepository.findByEmail(myMail);
+        UserEntity followerInfo = userRepository.findByEmail(followerMail);
+
+        FriendEntity friend = FriendEntity.addFriend(followerInfo.getName(),
+                followerInfo.getEmail(),
+                myInfo);
+
+        myInfo.addFriend(friend);
+        userRepository.save(myInfo);
+    }
+
+    @Override
+    public void deleteFriend(String myMail, String followerMail) {
+        UserEntity myInfo = userRepository.findByEmail(myMail);
+
+        myInfo.deleteFriend(followerMail);
+
+        userRepository.save(myInfo);
+    }
+
+    @Override
+    public UserDto getUserByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null)
             throw new UsernameNotFoundException(email);
