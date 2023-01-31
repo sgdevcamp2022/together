@@ -8,6 +8,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,13 +30,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private UserService userService;
     private Environment env;
+    private RedisTemplate<String,Object> redisTemplate;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
                                 UserService userService,
-                                Environment env) {
+                                Environment env,
+                                RedisTemplate<String,Object> redisTemplate) {
         super.setAuthenticationManager(authenticationManager);
         this.userService = userService;
         this.env = env;
+        this.redisTemplate = redisTemplate;
     }
     /**
      * 로그인하면 제일 먼저 실행
@@ -85,5 +90,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("atk", accessToken);
         response.addHeader("rtk", refreshToken);
         response.addHeader("userId", userDetails.getUserId());
+
+//        redis에 refresh token 저장
+        ValueOperations<String, Object> vop = redisTemplate.opsForValue();
+        vop.set(userName,refreshToken);
     }
 }
