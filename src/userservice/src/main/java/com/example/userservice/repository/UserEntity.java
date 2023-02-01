@@ -30,7 +30,7 @@ public class UserEntity extends BaseEntity {
     private String encryptedPwd;
 
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "f_id")
     @JsonManagedReference
     private List<FriendEntity> friendList = new ArrayList<>();

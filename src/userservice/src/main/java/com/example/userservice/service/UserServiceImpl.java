@@ -17,9 +17,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -99,6 +101,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public void addFriend(String myMail, String followerMail) {
         UserEntity myInfo = userRepository.findByEmail(myMail);
@@ -113,15 +116,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteFriend(String myMail, String followerMail) {
         UserEntity myInfo = userRepository.findByEmail(myMail);
+        FriendEntity friendEntity = friendRepository.findByEmail(followerMail).orElseThrow(()->new NoSuchElementException());
 
-        myInfo.deleteFriend(followerMail);
-
-        userRepository.save(myInfo);
+        friendRepository.delete(friendEntity);
     }
 
     @Override
+    @Transactional
     public List<FriendDto> getFriendList(String userId) {
         UserEntity myInfo = userRepository.findByUserId(userId);
         List<FriendDto> res = new ArrayList<>();
