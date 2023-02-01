@@ -1,11 +1,13 @@
 package com.example.userservice.service;
 
+import com.example.userservice.dto.FriendDto;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.FriendEntity;
 import com.example.userservice.repository.FriendRepository;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.RequestUser;
+import com.example.userservice.vo.ResponseDetailUser;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -54,16 +57,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserDetailsByUserId(String userId) {
+    public ResponseDetailUser getUserDetailsByUserId(String userId) {
         UserEntity userEntity = checkValidUser(userId);
+        List<FriendEntity> friendEntityList = userEntity.getFriendList();
+        List<FriendDto> friendList = new ArrayList<>();
 
-        UserDto userDto = new ModelMapper().map(userEntity,UserDto.class);
+        friendEntityList.forEach(entity -> {
+            friendList.add(new ModelMapper().map(entity,FriendDto.class));
+        });
+        ResponseDetailUser userDetail = new ModelMapper().map(userEntity,ResponseDetailUser.class);
+        userDetail.setFriendList(friendList);
         log.info("followerList:"+userEntity.getFriendList().toString());
-//        TODO 사용자 추가 정보(채널, 친구 목록 등) 가져와서 userDto에 추가
 
-
-
-        return userDto;
+        return userDetail;
     }
 
     @Override
@@ -99,10 +105,10 @@ public class UserServiceImpl implements UserService {
         UserEntity followerInfo = userRepository.findByEmail(followerMail);
 
         FriendEntity friend = FriendEntity.addFriend(followerInfo.getName(),
-                followerInfo.getEmail(),
-                myInfo);
+                followerInfo.getEmail());
 
         myInfo.addFriend(friend);
+        friendRepository.save(friend);
         userRepository.save(myInfo);
     }
 
@@ -113,6 +119,18 @@ public class UserServiceImpl implements UserService {
         myInfo.deleteFriend(followerMail);
 
         userRepository.save(myInfo);
+    }
+
+    @Override
+    public List<FriendDto> getFriendList(String userId) {
+        UserEntity myInfo = userRepository.findByUserId(userId);
+        List<FriendDto> res = new ArrayList<>();
+
+        List<FriendEntity> dbList = myInfo.getFriendList();
+
+        dbList.forEach(friend -> res.add(new ModelMapper().map(friend, FriendDto.class)));
+
+        return res;
     }
 
     @Override

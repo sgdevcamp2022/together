@@ -1,7 +1,6 @@
 package com.example.userservice.repository;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserEntity {
+public class UserEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tbr_id")
@@ -31,15 +30,17 @@ public class UserEntity {
     private String encryptedPwd;
 
 
-    @OneToMany(mappedBy = "m_user",cascade = CascadeType.ALL)
+    @OneToMany
+    @JoinColumn(name = "f_id")
+    @JsonManagedReference
     private List<FriendEntity> friendList = new ArrayList<>();
 
     public void deleteFriend(String email){
         this.friendList.stream()
                 .filter(o->o.getEmail().equals(email))
                 .collect(Collectors.toList())
-                .forEach(li->{this.friendList.remove(li);
-                li.setM_user(null);});
+                .forEach(li->{this.friendList.remove(li);}
+                );
     }
 
     public void addFriend(FriendEntity friend){

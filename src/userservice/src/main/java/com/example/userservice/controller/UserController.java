@@ -3,7 +3,9 @@ package com.example.userservice.controller;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.service.UserService;
+import com.example.userservice.vo.RequestFriend;
 import com.example.userservice.vo.RequestUser;
+import com.example.userservice.vo.ResponseDetailUser;
 import com.example.userservice.vo.ResponseUser;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -53,12 +55,15 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<ResponseUser> getUser(@PathVariable("id") String userId) {
-        UserDto userDto = userService.getUserDetailsByUserId(userId);
+    public ResponseEntity<Map<String,Object>> getUser(@PathVariable("id") String userId) {
+        Map<String, Object> res = new HashMap<>();
+        ResponseDetailUser userDetail = userService.getUserDetailsByUserId(userId);
 
-        ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
+        ResponseDetailUser returnValue = new ModelMapper().map(userDetail, ResponseDetailUser.class);
+        res.put("user",returnValue);
 
-        return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @PostMapping("/user/{id}")
@@ -90,22 +95,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @PostMapping("/user/{my_email}/add/{user_email}")
-    public ResponseEntity<ResponseUser> addFriend(@PathVariable("user_email") String username,
-                                                  @PathVariable("my_email") String myemail) {
-        userService.addFriend(myemail,username);
+    @PostMapping("/friend")
+    public ResponseEntity<ResponseUser> addFriend(@RequestBody RequestFriend req) {
+        userService.addFriend(req.getMyEmail(),req.getFriendEmail());
 
-        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(myemail), ResponseUser.class);
+        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(req.getMyEmail()), ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/user/{my_email}/add/{user_email}")
-    public ResponseEntity<ResponseUser> deleteFriend(@PathVariable("user_email") String username,
-                                                  @PathVariable("my_email") String myemail) {
-        userService.deleteFriend(myemail,username);
+    @DeleteMapping("/friend")
+    public ResponseEntity<ResponseUser> deleteFriend(@RequestBody RequestFriend req) {
+        userService.deleteFriend(req.getMyEmail(),req.getFriendEmail());
 
-        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(myemail), ResponseUser.class);
+        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(req.getMyEmail()), ResponseUser.class);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

@@ -1,9 +1,13 @@
 package com.example.userservice.service;
 
+import com.example.userservice.dto.FriendDto;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.vo.RequestUser;
+import com.example.userservice.vo.ResponseDetailUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
+
+import java.util.List;
 
 public interface UserService extends UserDetailsService {
     /**
@@ -18,7 +22,7 @@ public interface UserService extends UserDetailsService {
      * @return
      * userID(UUID)로 찾은 user 반환
      */
-    UserDto getUserDetailsByUserId(String userId);
+    ResponseDetailUser getUserDetailsByUserId(String userId);
 
     /**
      * @param userId
@@ -32,8 +36,9 @@ public interface UserService extends UserDetailsService {
 
     Iterable<UserEntity> getAllUser();
 
-    void addFriend(String follower, String username);
-    void deleteFriend(String follower, String username);
+    void addFriend(String myMail, String followerMail);
+    void deleteFriend(String myMail, String followerMail);
+    List<FriendDto> getFriendList(String userId);
 
     UserDto getUserByEmail(String email);
 }
