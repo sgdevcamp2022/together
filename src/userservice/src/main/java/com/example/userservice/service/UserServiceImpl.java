@@ -2,6 +2,8 @@ package com.example.userservice.service;
 
 import com.example.userservice.dto.FriendDto;
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.exception.CustomException;
+import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.FriendEntity;
 import com.example.userservice.repository.FriendRepository;
 import com.example.userservice.repository.UserEntity;
@@ -21,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         if (userRepository.existsUserEntityByEmail(userDto.getEmail()))
-            throw new IllegalArgumentException("이미 가입된 email입니다.");
+            throw new CustomException(ErrorCode.CANNOT_FIND_USER);
 
         userDto.setUserId(UUID.randomUUID().toString());
 
@@ -60,7 +61,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseDetailUser getUserDetailsByUserId(String userId) {
-        UserEntity userEntity = checkValidUser(userId);
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
         List<FriendEntity> friendEntityList = userEntity.getFriendList();
         List<FriendDto> friendList = new ArrayList<>();
 
@@ -76,7 +78,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(String userId, RequestUser userInfo) {
-        UserEntity userEntity = checkValidUser(userId);
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         userEntity.setName(userInfo.getName());
         userEntity.setEmail(userInfo.getEmail());
@@ -91,7 +94,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
-        UserEntity userEntity = checkValidUser(userId);
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         userRepository.delete(userEntity);
     }
@@ -104,8 +108,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void addFriend(String myMail, String followerMail) {
-        UserEntity myInfo = userRepository.findByEmail(myMail);
-        UserEntity followerInfo = userRepository.findByEmail(followerMail);
+        UserEntity myInfo = userRepository.findByEmail(myMail)
+                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
+        UserEntity followerInfo = userRepository.findByEmail(followerMail)
+                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         FriendEntity friend = FriendEntity.addFriend(followerInfo.getName(),
                 followerInfo.getEmail());
@@ -118,8 +124,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteFriend(String myMail, String followerMail) {
-        UserEntity myInfo = userRepository.findByEmail(myMail);
-        FriendEntity friendEntity = friendRepository.findByEmail(followerMail).orElseThrow(()->new NoSuchElementException());
+        UserEntity userEntity = userRepository.findByEmail(myMail)
+                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
+        FriendEntity friendEntity = friendRepository.findByEmail(followerMail)
+                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         friendRepository.delete(friendEntity);
     }
@@ -127,10 +135,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<FriendDto> getFriendList(String userId) {
-        UserEntity myInfo = userRepository.findByUserId(userId);
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
         List<FriendDto> res = new ArrayList<>();
 
-        List<FriendEntity> dbList = myInfo.getFriendList();
+        List<FriendEntity> dbList = userEntity.getFriendList();
 
         dbList.forEach(friend -> res.add(new ModelMapper().map(friend, FriendDto.class)));
 
@@ -139,25 +148,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email);
-        if (userEntity == null)
-            throw new UsernameNotFoundException(email);
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
         return userDto;
     }
 
-    private UserEntity checkValidUser(String userId) {
-        UserEntity userEntity = userRepository.findByUserId(userId);
-
-        if (userEntity == null)
-            throw new UsernameNotFoundException("User를 찾을 수 없습니다.");
-        return userEntity;
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username){
-        UserEntity userEntity = userRepository.findByEmail(username);
+        UserEntity userEntity = userRepository.findByEmail(username)
+                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         if (userEntity == null)
             throw new UsernameNotFoundException(username);
