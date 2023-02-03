@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         if (userEntity == null)
-            throw new UsernameNotFoundException(username);
+            throw new CustomException(ErrorCode.CANNOT_FIND_USER);
         return new User(userEntity.getEmail(), userEntity.getEncryptedPwd(),
                 true,true,true,true,
                 new ArrayList<>());

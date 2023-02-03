@@ -1,6 +1,8 @@
 package com.example.userservice.security;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.exception.CustomException;
+import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.service.UserService;
 import com.example.userservice.vo.RequestLogin;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +62,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             //사용자로부터 입력 받은 정보를 토큰으로 바꿔서 매니저로 넘기면
             // 아이디와 패스워드를 비교하겠다는 것
         } catch (IOException e){
-            throw new RuntimeException(e);
+            throw new CustomException(ErrorCode.LOGIN_ERROR);
         }
     }
 

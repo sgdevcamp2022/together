@@ -1,6 +1,8 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.exception.CustomException;
+import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.service.UserService;
 import com.example.userservice.vo.RequestFriend;
@@ -97,6 +99,7 @@ public class UserController {
 
     @PostMapping("/friend")
     public ResponseEntity<ResponseUser> addFriend(@RequestBody RequestFriend req) {
+//        TODO 친구 기능 분리하기
         userService.addFriend(req.getMyEmail(),req.getFriendEmail());
 
         ResponseUser response = new ModelMapper().map(userService.getUserByEmail(req.getMyEmail()), ResponseUser.class);
@@ -115,6 +118,7 @@ public class UserController {
 
     @PostMapping("/user/refresh")
     public Map<String, Object> requestAccessToken(@RequestBody Map<String, String> m) throws ExpiredJwtException {
+//        TODO 토큰 기능 분리하기
         String userId = null;
         Map<String, Object> map = new HashMap<>();
         String expiredAccessToken = m.get("accessToken");
@@ -127,7 +131,7 @@ public class UserController {
                     .getSubject();
         } catch (ExpiredJwtException e) {
             userId = e.getClaims().getSubject();
-        } if (userId == null) throw new IllegalArgumentException(); // 토큰 검증 에러
+        } if (userId == null) throw new CustomException(ErrorCode.BAD_TOKEN); // 토큰 검증 에러
 
         String email = userService.getUserDetailsByUserId(userId).getEmail();
         ValueOperations<String, Object> vop = redisTemplate.opsForValue();
@@ -136,7 +140,7 @@ public class UserController {
 
 //        저장된 refreshToken와 body의 refreshToken이 같은지 확인
         if (!refreshToken.equals(refreshTokenFromDb)){
-            map.put("error","refresh token 검증 error");
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
 //        refresh 토큰 만료 확인
@@ -145,7 +149,7 @@ public class UserController {
                     .parseClaimsJws(refreshToken).getBody()
                     .getSubject();
         } catch (ExpiredJwtException e){
-            map.put("error",e);
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
 
