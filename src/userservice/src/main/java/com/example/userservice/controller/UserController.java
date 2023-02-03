@@ -4,18 +4,14 @@ import com.example.userservice.dto.UserDto;
 import com.example.userservice.exception.CustomException;
 import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.UserEntity;
+import com.example.userservice.security.TokenProvider;
 import com.example.userservice.service.UserService;
-import com.example.userservice.vo.RequestFriend;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseDetailUser;
 import com.example.userservice.vo.ResponseUser;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -28,17 +24,17 @@ import java.util.*;
 @RequestMapping("")
 public class UserController {
 
-    UserService userService;
-    private RedisTemplate<String,Object> redisTemplate;
-    private Environment env;
+    private final UserService userService;
+    private final TokenProvider tokenProvider;
+    private final RedisTemplate<String,Object> redisTemplate;
 
     @Autowired
     public UserController(UserService userService,
-                          RedisTemplate<String,Object> redisTemplate,
-                          Environment env){
+                          TokenProvider tokenProvider,
+                          RedisTemplate<String,Object> redisTemplate){
         this.redisTemplate = redisTemplate;
         this.userService = userService;
-        this.env = env;
+        this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/user")
@@ -97,46 +93,22 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @PostMapping("/friend")
-    public ResponseEntity<ResponseUser> addFriend(@RequestBody RequestFriend req) {
-//        TODO 친구 기능 분리하기
-        userService.addFriend(req.getMyEmail(),req.getFriendEmail());
-
-        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(req.getMyEmail()), ResponseUser.class);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @DeleteMapping("/friend")
-    public ResponseEntity<ResponseUser> deleteFriend(@RequestBody RequestFriend req) {
-        userService.deleteFriend(req.getMyEmail(),req.getFriendEmail());
-
-        ResponseUser response = new ModelMapper().map(userService.getUserByEmail(req.getMyEmail()), ResponseUser.class);
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
 
     @PostMapping("/user/refresh")
-    public Map<String, Object> requestAccessToken(@RequestBody Map<String, String> m) throws ExpiredJwtException {
-//        TODO 토큰 기능 분리하기
+    public Map<String, Object> requestAccessToken(@RequestBody Map<String, String> m){
         String userId = null;
         Map<String, Object> map = new HashMap<>();
         String expiredAccessToken = m.get("accessToken");
         String refreshToken = m.get("refreshToken");
 
 //        만료된 accessToken에서 email 가져오기 시도
-        try{
-            userId = Jwts.parser().setSigningKey(env.getProperty("token.secret"))
-                    .parseClaimsJws(expiredAccessToken).getBody()
-                    .getSubject();
-        } catch (ExpiredJwtException e) {
-            userId = e.getClaims().getSubject();
-        } if (userId == null) throw new CustomException(ErrorCode.BAD_TOKEN); // 토큰 검증 에러
+        userId = tokenProvider.getIdFromAccessToken(expiredAccessToken);
 
         String email = userService.getUserDetailsByUserId(userId).getEmail();
         ValueOperations<String, Object> vop = redisTemplate.opsForValue();
 
         String refreshTokenFromDb = (String) vop.get(email);
+        if(refreshTokenFromDb == null) throw new CustomException(ErrorCode.BAD_TOKEN);
 
 //        저장된 refreshToken와 body의 refreshToken이 같은지 확인
         if (!refreshToken.equals(refreshTokenFromDb)){
@@ -144,22 +116,11 @@ public class UserController {
         }
 
 //        refresh 토큰 만료 확인
-        try{
-            email = Jwts.parser().setSigningKey(env.getProperty("token.secret"))
-                    .parseClaimsJws(refreshToken).getBody()
-                    .getSubject();
-        } catch (ExpiredJwtException e){
-            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-        }
+        tokenProvider.checkValidToken(refreshToken);
 
 
 //          다 통과했다면 accessToken 반환
-        String newAccessToken = Jwts.builder()
-                .setSubject(userId)
-                .setExpiration(new Date(System.currentTimeMillis() +
-                        Long.parseLong(env.getProperty("token.access_expiration_time"))))
-                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
-                .compact();
+        String newAccessToken = tokenProvider.buildAccessToken(userId);
 
         map.put("accessToken", newAccessToken);
         map.put("refreshToken", refreshToken);

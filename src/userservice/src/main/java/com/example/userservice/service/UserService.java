@@ -36,8 +36,7 @@ public interface UserService extends UserDetailsService {
 
     Iterable<UserEntity> getAllUser();
 
-    void addFriend(String myMail, String followerMail);
-    void deleteFriend(String myMail, String followerMail);
+
     List<FriendDto> getFriendList(String userId);
 
     UserDto getUserByEmail(String email);

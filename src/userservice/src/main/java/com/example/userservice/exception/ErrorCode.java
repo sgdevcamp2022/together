@@ -21,6 +21,7 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레쉬 토큰 검증 에러")
     ;
 
+//    스테이터스 코드 커스텀 가능
     private final HttpStatus status;
     private final String message;
 }

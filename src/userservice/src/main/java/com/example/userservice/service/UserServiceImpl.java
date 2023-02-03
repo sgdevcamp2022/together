@@ -5,7 +5,6 @@ import com.example.userservice.dto.UserDto;
 import com.example.userservice.exception.CustomException;
 import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.FriendEntity;
-import com.example.userservice.repository.FriendRepository;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.RequestUser;
@@ -16,7 +15,6 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,23 +26,23 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final FriendRepository friendRepository;
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder,
-                           FriendRepository friendRepository){
+                           BCryptPasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.friendRepository = friendRepository;
     }
 
     @Override
+    @Transactional(rollbackFor = {CustomException.class})
     public UserDto createUser(UserDto userDto) {
-        if (userRepository.existsUserEntityByEmail(userDto.getEmail()))
-            throw new CustomException(ErrorCode.CANNOT_FIND_USER);
+        if (userRepository.existsUserEntityByEmail(userDto.getEmail())) {
+            log.info("이미 가입된 유저");
+            throw new CustomException(ErrorCode.CANNOT_CREATE_USER);
+        }
 
         userDto.setUserId(UUID.randomUUID().toString());
 
@@ -105,32 +103,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
-    @Transactional
-    @Override
-    public void addFriend(String myMail, String followerMail) {
-        UserEntity myInfo = userRepository.findByEmail(myMail)
-                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
-        UserEntity followerInfo = userRepository.findByEmail(followerMail)
-                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
-
-        FriendEntity friend = FriendEntity.addFriend(followerInfo.getName(),
-                followerInfo.getEmail());
-
-        myInfo.addFriend(friend);
-        friendRepository.save(friend);
-        userRepository.save(myInfo);
-    }
-
-    @Override
-    @Transactional
-    public void deleteFriend(String myMail, String followerMail) {
-        UserEntity userEntity = userRepository.findByEmail(myMail)
-                .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
-        FriendEntity friendEntity = friendRepository.findByEmail(followerMail)
-                .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
-
-        friendRepository.delete(friendEntity);
-    }
 
     @Override
     @Transactional
