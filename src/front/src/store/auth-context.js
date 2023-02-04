@@ -11,15 +11,18 @@ const AuthContext = React.createContext({
 // 이 컴포넌트를 다른 컴포넌트를 감싸는 래퍼로 사용하면
 // 다른 컴포넌트가 이 컨텍스트에 접근할 수 있다.
 export const AuthContextProvider = (props) => {
-    const [token, setToken] = useState(null)
+    const initialToken = localStorage.getItem('token');
+    const [token, setToken] = useState(initialToken);
 
     const userIsLoggedIn = !!token; // 토큰이 있다면 로그인 상태로 인식
 
     const loginHandler = (token)=>{
         setToken(token);
+        localStorage.setItem('token',token);
     }
     const loggoutHandler = ()=>{
         setToken(null);
+        localStorage.removeItem('token');
     }
     const contextValue = {
         token: token,
