@@ -1,9 +1,11 @@
 import { useState, useRef, useContext } from 'react';
+import {useHistory} from "react-router-dom";
 
 import classes from './AuthForm.module.css';
 import AuthContext from "../../store/auth-context";
 
 const AuthForm = () => {
+  const history = useHistory();
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
   const nameInputRef = useRef();
@@ -45,7 +47,8 @@ const AuthForm = () => {
       ).then(res => {
         setIsLoading(false);
         if(res.ok) {
-          //  회원가입 통신이 완료된 경우
+          //  로그인 통신이 완료된 경우
+          authCtx.login(data.idToken)
         } else {
           // 통신이 실패하면 에러 내용 출력
           return res.json().then(data => {
@@ -82,12 +85,21 @@ const AuthForm = () => {
             // if (data && data.error && data.error.message) {
             //   errorMessage = data.error.message;
             // } // 서버에서 받은 에러 그대로 출력 가능
-            alert(errorMessage);
-          })
+            throw new Error(errorMessage);
+          });
         }
+      }).then((data)=>{
+        console.log(data);
+        // context에 저장
+        authCtx.login(data.atk);
+        // 사용자를 홈 페이지로 redirect.
+        history.replace('/');
       })
+        .catch((err) => {
+          alert(err.message);
+      });
     }
-  }
+  };
 
   return (
     <section className={classes.auth}>
