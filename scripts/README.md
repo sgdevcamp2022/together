@@ -1,1 +1,0 @@
-## 이곳은 DB스키마, Generator, BatchJob
