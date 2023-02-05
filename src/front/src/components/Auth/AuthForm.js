@@ -89,9 +89,11 @@ const AuthForm = () => {
           });
         }
       }).then((data)=>{
-        console.log(data);
+        const expirationTime = new Date(
+    new Date().getTime() + (data.expiresIn * 1000)
+        );
         // context에 저장
-        authCtx.login(data.atk);
+        authCtx.login(data.atk, expirationTime.toISOString());
         // 사용자를 홈 페이지로 redirect.
         history.replace('/');
       })
