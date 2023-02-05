@@ -25,12 +25,11 @@ const AuthForm = () => {
     // ref를 지정한 email, password 영역에서 데이터를 추출해올 수 있다.
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
-    const enteredName = nameInputRef.current.value;
 
   //  옵션 : validation 추가 가능
 
     //
-    setIsLogin(true);
+    setIsLoading(true);
     if (isLogin) {
       //서버에 로그인 요청
       fetch('http://localhost:8000/user-service/login',
@@ -38,29 +37,32 @@ const AuthForm = () => {
             method : 'POST',
             body : JSON.stringify({
               email: enteredEmail,
-              pwd : enteredPassword
+              password : enteredPassword
             }),
             headers: {
               'Content-Type': 'application/json'
             }
           }
-      ).then(res => {
-        setIsLoading(false);
-        if(res.ok) {
+      ).then((res)=>res.json())
+        .then(res => {
+          setIsLoading(false);
           //  로그인 통신이 완료된 경우
-          authCtx.login(data.idToken)
-        } else {
-          // 통신이 실패하면 에러 내용 출력
-          return res.json().then(data => {
+          if(res.atk != null) {
+            const expirationTime = new Date(
+                new Date().getTime() + (res.expirationTime * 1000)
+            );
+            // context에 저장
+            authCtx.login(res.atk, expirationTime.toISOString());
+            // 사용자를 홈 페이지로 redirect.
+            history.replace('/');
+          }else {
+            // 통신이 실패하면 에러 내용 출력
             let errorMessage = 'Authentication failed!';
-            // if (data && data.error && data.error.message) {
-            //   errorMessage = data.error.message;
-            // } // 서버에서 받은 에러 그대로 출력 가능
             alert(errorMessage);
-          })
-        }
-      })
-    } else {
+          }
+      })}
+    else {
+      const enteredName = nameInputRef.current.value;
       //서버에 회원가입 요청
       fetch('http://localhost:8000/user-service/user',
           {
@@ -88,12 +90,7 @@ const AuthForm = () => {
             throw new Error(errorMessage);
           });
         }
-      }).then((data)=>{
-        const expirationTime = new Date(
-    new Date().getTime() + (data.expiresIn * 1000)
-        );
-        // context에 저장
-        authCtx.login(data.atk, expirationTime.toISOString());
+      }).then((res)=>{
         // 사용자를 홈 페이지로 redirect.
         history.replace('/');
       })
@@ -111,7 +108,7 @@ const AuthForm = () => {
           <label htmlFor='email'>Your Email</label>
           <input type='email' id='email' required ref={emailInputRef} />
         </div>
-        {isLogin && <div className={classes.control}>
+        {!isLogin && <div className={classes.control}>
           <label htmlFor='name'>Your Name</label>
           <input type='name' id='name' required ref={nameInputRef} />
         </div>}
