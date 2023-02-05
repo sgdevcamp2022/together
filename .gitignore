@@ -1,1 +1,2 @@
-src/signalServer/node_modules
+src/client/node_modules
+.idea/
