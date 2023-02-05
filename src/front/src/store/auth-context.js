@@ -51,7 +51,7 @@ export const AuthContextProvider = (props) => {
 
     const userIsLoggedIn = !!token; // 토큰이 있다면 로그인 상태로 인식
 
-    const loggoutHandler = useCallback(()=>{
+    const logoutHandler = useCallback(()=>{
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('expirationTime')
@@ -68,7 +68,7 @@ export const AuthContextProvider = (props) => {
         const remainingTime = calculateRemainingTime(expirationTime);
 
         //만료 시간이 되면 로그아웃
-        logoutTimer = setTimeout(loggoutHandler, remainingTime);
+        logoutTimer = setTimeout(logoutHandler, remainingTime);
     };
 
     useEffect(() =>{
@@ -76,19 +76,19 @@ export const AuthContextProvider = (props) => {
             //자동 로그인으로 로그인 하여 토큰 데이터를 가져왔다면
             //만료 기간을 설정한다.
             console.log(tokenData.duration);
-            logoutTimer = setTimeout(loggoutHandler, tokenData.duration);
+            logoutTimer = setTimeout(logoutHandler, tokenData.duration);
         }
-    }, [tokenData, loggoutHandler()]);
+    }, [tokenData, logoutHandler]);
     //무한루프에 빠지지 않도록 핸들러에 콜백설정 필요
 
     const contextValue = {
         token: token,
         isLoggedIn: userIsLoggedIn,
         login: loginHandler,
-        logout: loggoutHandler,
+        logout: logoutHandler,
     };
 
-    return <AuthContext.Provider>{props.children}</AuthContext.Provider>
+    return <AuthContext.Provider value={contextValue}>{props.children}</AuthContext.Provider>
 };
 
 export default AuthContext;
