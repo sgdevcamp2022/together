@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -89,12 +91,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
 
-        response.addHeader("atk", accessToken);
-        response.addHeader("rtk", refreshToken);
-        response.addHeader("userId", userDetails.getUserId());
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("atk",accessToken);
+        body.put("rtk", refreshToken);
+        body.put("userId",userDetails.getUserId());
+        body.put("expirationTime", env.getProperty("token.access_expiration_time"));
 
 //        redis에 refresh token 저장
         ValueOperations<String, Object> vop = redisTemplate.opsForValue();
         vop.set(userName,refreshToken);
+
+        new ObjectMapper().writeValue(response.getOutputStream(),body);
     }
 }
