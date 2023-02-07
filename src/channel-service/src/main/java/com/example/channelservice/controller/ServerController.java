@@ -4,6 +4,7 @@ import com.example.channelservice.dto.ChannelDto;
 import com.example.channelservice.dto.ServerDto;
 import com.example.channelservice.service.ChannelService;
 import com.example.channelservice.service.ServerService;
+import com.example.channelservice.service.UserInServerService;
 import com.example.channelservice.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -21,11 +22,15 @@ import java.util.List;
 public class ServerController {
     ServerService serverService;
     ChannelService channelService;
+    UserInServerService userInServerService;
 
     @Autowired
-    public ServerController(ChannelService channelService, ServerService serverService){
+    public ServerController(ChannelService channelService,
+                            ServerService serverService,
+                            UserInServerService userInServerService){
         this.channelService = channelService;
         this.serverService = serverService;
+        this.userInServerService = userInServerService;
     }
 
     @PostMapping("/server")
@@ -90,5 +95,17 @@ public class ServerController {
 
         ResponseServer responseServer = new ModelMapper().map(updatedServer, ResponseServer.class);
         return ResponseEntity.status(HttpStatus.OK).body(responseServer);
+    }
+
+    @GetMapping("servers/{user_id}")
+    public ResponseEntity<List<ResponseServer>> getServersByUserId(@PathVariable("user_id") String userId) {
+        List<ServerDto> serverList = userInServerService.getAllServersByUserId(userId);
+        List<ResponseServer> res = new ArrayList<>();
+
+        serverList.forEach(e->{
+            res.add(new ModelMapper().map(e,ResponseServer.class));
+        });
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }
