@@ -26,7 +26,7 @@ public class ServerEntity {
     // TODO 지우거나 수정할 때 쉽게 찾으려 hashmap으로 변경할지 고민
     private List<ChannelEntity> channelList = new ArrayList<>();
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserServer> userServers = new ArrayList<>();
+    private List<UserInServerEntity> userList = new ArrayList<>();
 
     @Builder
     public ServerEntity(String name, String info) {
@@ -39,6 +39,16 @@ public class ServerEntity {
                 .name(serverName)
                 .info(serverInfo)
                 .build();
+    }
+
+    public void addUser(UserInServerEntity user) {
+        this.userList.add(user);
+    }
+    public void deleteUser(String userId) {
+        this.userList.stream()
+                .filter(o->o.getUserId().equals(userId))
+                .collect(Collectors.toList())
+                .forEach(us->this.userList.remove(us));
     }
 
     public void addChannel(ChannelEntity channel) {
