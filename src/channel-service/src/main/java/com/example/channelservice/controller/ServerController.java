@@ -106,7 +106,7 @@ public class ServerController {
         return ResponseEntity.status(HttpStatus.OK).body(responseServer);
     }
 
-    @GetMapping("servers/{user_id}")
+    @GetMapping("{user_id}/servers")
     public ResponseEntity<List<ResponseServer>> getServersByUserId(@PathVariable("user_id") String userId) {
         List<ServerDto> serverList = userInServerService.getAllServersByUserId(userId);
         List<ResponseServer> res = new ArrayList<>();
