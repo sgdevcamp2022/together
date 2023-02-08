@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface UserInServerService {
     List<ServerDto> getAllServersByUserId(String userId);
+    List<UserDto> getAllUsersByServerId(Long serverId);
 }

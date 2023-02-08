@@ -9,4 +9,5 @@ public class ResponseServerDetail {
     private String name;
     private String info;
     private List<ResponseChannel> channelList;
+    private List<ResponseUser> userList;
 }

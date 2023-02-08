@@ -2,6 +2,7 @@ package com.example.channelservice.controller;
 
 import com.example.channelservice.dto.ChannelDto;
 import com.example.channelservice.dto.ServerDto;
+import com.example.channelservice.dto.UserDto;
 import com.example.channelservice.service.ChannelService;
 import com.example.channelservice.service.ServerService;
 import com.example.channelservice.service.UserInServerService;
@@ -56,7 +57,15 @@ public class ServerController {
             channelRes.add(new ModelMapper().map(c, ResponseChannel.class));
         });
 
+        List<UserDto> userList = userInServerService.getAllUsersByServerId(serverId);
+        List<ResponseUser> userRes = new ArrayList<>();
+        userList.forEach(u->{
+            userRes.add(new ModelMapper().map(u,ResponseUser.class));
+        });
+
+
         result.setChannelList(channelRes);
+        result.setUserList(userRes);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
