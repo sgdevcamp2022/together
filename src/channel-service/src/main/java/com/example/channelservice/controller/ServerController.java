@@ -38,8 +38,7 @@ public class ServerController {
     public ResponseEntity<ResponseServer> createServer(@RequestBody RequestCreateServer serverDetails) {
         ModelMapper mapper = new ModelMapper();
 
-        ServerDto serverDto = mapper.map(serverDetails, ServerDto.class);
-        ServerDto createdServer = serverService.createServer(serverDto);
+        ServerDto createdServer = serverService.createServer(serverDetails);
 
         ResponseServer responseServer = mapper.map(createdServer, ResponseServer.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseServer);
