@@ -18,4 +18,5 @@ public class ResponseDetailUser {
     private LocalDateTime updatedAt;
 
     private List<FriendDto> friendList;
+    private List<ResponseServer> serverList;
 }

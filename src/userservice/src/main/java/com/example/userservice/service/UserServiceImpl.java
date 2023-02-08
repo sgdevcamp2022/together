@@ -1,5 +1,6 @@
 package com.example.userservice.service;
 
+import com.example.userservice.client.ChannelServiceClient;
 import com.example.userservice.dto.FriendDto;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.exception.CustomException;
@@ -9,6 +10,7 @@ import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseDetailUser;
+import com.example.userservice.vo.ResponseServer;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -28,12 +30,15 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
+    ChannelServiceClient channelServiceClient;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder){
+                           BCryptPasswordEncoder passwordEncoder,
+                           ChannelServiceClient channelServiceClient){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.channelServiceClient = channelServiceClient;
     }
 
     @Override
@@ -70,6 +75,9 @@ public class UserServiceImpl implements UserService {
         ResponseDetailUser userDetail = new ModelMapper().map(userEntity,ResponseDetailUser.class);
         userDetail.setFriendList(friendList);
         log.info("followerList:"+userEntity.getFriendList().toString());
+
+        List<ResponseServer> serverList =channelServiceClient.getServers(userId);
+        userDetail.setServerList(serverList);
 
         return userDetail;
     }

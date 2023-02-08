@@ -1,10 +1,10 @@
 
 server:
-  port: 8080
+  port: 0
 
 spring:
   application:
-    name: order-service
+    name: channel-service
   jpa:
     properties:
       hibernate:

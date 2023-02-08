@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class ServerDto {
+    private Long id;
     private String name;
     private String info;
     private String userId;
