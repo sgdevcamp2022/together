@@ -32,7 +32,6 @@ public class ChannelServiceImpl implements ChannelService{
     public ChannelDto createChannel(ChannelDto channelDetails, Long serverId) {
         ServerEntity server = serverRepository.findById(serverId).orElseThrow(()->new NoSuchElementException());
 
-//        TODO NullPointer 처리 어떻게 하지
             ChannelEntity channelEntity = ChannelEntity.createChannel(channelDetails.getName(),
                     channelDetails.getInfo(),
                     channelDetails.getType(),
