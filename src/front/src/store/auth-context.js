@@ -54,17 +54,19 @@ export const AuthContextProvider = (props) => {
     const logoutHandler = useCallback(()=>{
         setToken(null);
         localStorage.removeItem('token');
-        localStorage.removeItem('expirationTime')
+        localStorage.removeItem('expirationTime');
+        localStorage.removeItem('userId');
 
         if(logoutTimer) {
             clearTimeout(logoutTimer);
         }
     },[]);
 
-    const loginHandler = (token, expirationTime)=>{
+    const loginHandler = (token, expirationTime, userId)=>{
         setToken(token);
         localStorage.setItem('token',token);
         localStorage.setItem('expirationTime', expirationTime);
+        localStorage.setItem('userId',userId);
         const remainingTime = calculateRemainingTime(expirationTime);
 
         //만료 시간이 되면 로그아웃

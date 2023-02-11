@@ -1,44 +1,38 @@
-import {useContext, useRef} from "react";
+import { useEffect, useState } from "react";
 
-import AuthContext from "../../store/auth-context";
-import classes from './ProfileForm.module.css';
+import classes from "./ProfileForm.module.css";
+import UserDetailInfo from "./UserDetailInfo";
 
-const ProfileForm = () => {
-    const newPasswordInputRef = useRef();
-    const authCtx = useContext(AuthContext);
+const ProfileForm = (props) => {
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
-    const submitHandler = event => {
-        event.preventDeafult();
+  const [info, setInfo] = useState([]);
 
-        const enteredNewPassword = newPasswordInputRef.current.value;
 
-    //    옵션 add validation
-
-        fetch('http://localhost:8000/user',
-            {method: 'GET',
-                body: JSON.stringify({
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer '+authCtx.token
-                }
-            }).then(res => {
+  console.log(`http://localhost:8000/user-service/user/${userId}`);
+  useEffect(() => {
+    fetch(`http://localhost:8000/user-service/user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    })
+      .then((res) => res.json()) // json은 body에 있는 정보만 바꿔준다.
+      .then((res) => {
         //        항상 성공 응답이온다고 가정
+        console.log(res.user);
+        setInfo(res.user);
+      })
+      .catch((error) => console.log(error));
+  }, [token, userId]);
 
-        })
-    };
   return (
     //  TODO 받은 내용으로 유저 정보 표시하는 부분 작성 필요
-    <form className={classes.form}>
-      <div className={classes.control}>
-        <label htmlFor='new-password'>New Password</label>
-        <input type='password' id='new-password' minLength="4" ref={newPasswordInputRef}/>
-      </div>
-      <div className={classes.action}>
-        <button>Change Password</button>
-      </div>
-    </form>
+    <section className={classes.profile}>
+      <UserDetailInfo info={info}/>
+    </section>
   );
-}
-
+};
 export default ProfileForm;

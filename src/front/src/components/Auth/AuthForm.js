@@ -52,7 +52,7 @@ const AuthForm = () => {
                 new Date().getTime() + (res.expirationTime * 1000)
             );
             // context에 저장
-            authCtx.login(res.atk, expirationTime.toISOString());
+            authCtx.login(res.atk, expirationTime.toISOString(), res.userId);
             // 사용자를 홈 페이지로 redirect.
             history.replace('/');
           }else {
