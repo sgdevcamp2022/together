@@ -37,3 +37,6 @@ out/
 ### VS Code ###
 .vscode/
 /.idea/
+
+## react
+src/front/package-lock.json
