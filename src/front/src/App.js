@@ -2,12 +2,12 @@ import { Switch, Route, Redirect } from "react-router-dom";
 import { useContext } from "react";
 
 import Layout from "./components/Layout/Layout";
-import UserProfile from "./components/Profile/UserProfile";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import AuthContext from "./store/auth-context";
 import ServerPage from "./pages/ServerPage";
 import ProfilePage from "./pages/ProfilePage";
+import ChannelPage from "./pages/ChannelPage";
 
 function App() {
   const authCtx = useContext(AuthContext);
@@ -28,6 +28,10 @@ function App() {
         </Route>
         <Route path="/server">
           {authCtx.isLoggedIn && <ServerPage />}
+          {!authCtx.isLoggedIn && <Redirect to="/auth" />}
+        </Route>
+        <Route path="/channel">
+          {authCtx.isLoggedIn && <ChannelPage />}
           {!authCtx.isLoggedIn && <Redirect to="/auth" />}
         </Route>
         <Route path="*">

@@ -1,14 +1,25 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import ChannelList from "../Channel/ChannelList";
 
-function Server({server}) {
-    return (
-        <div>
-            <b>{server.id}</b> <span>({server.name})</span>
-        </div>
-    );
+function Server({ server }) {
+  const serverId = server.id;
+  return (
+    <Link to={{
+      pathname: "/channel",
+      state: {
+        serverId: serverId
+      }
+    }}>
+      <div>
+        <b>{server.id}</b> <span>서버명 : {server.name}</span>
+        <span>서버 정보 : {server.info}</span>
+      </div>
+    </Link>
+  );
 }
 
-const ServerList = ()=> {
+const ServerList = () => {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
@@ -31,18 +42,15 @@ const ServerList = ()=> {
       .catch((error) => console.log(error));
   }, [token, userId]);
 
-
-
   return (
-    //  TODO 받은 내용으로 유저 정보 표시하는 부분 작성 필요
     <section>
       <div>
-        {info.map((server,index) => (
-            <Server server={server} key={index}/>
+        {info.map((server, index) => (
+          <Server server={server} key={index} />
         ))}
       </div>
     </section>
   );
-}
+};
 
 export default ServerList;
