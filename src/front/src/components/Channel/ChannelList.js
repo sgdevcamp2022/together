@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function Channel({ channel }) {
-  // const channelId = channel.id;
+function Channel({ channel, server }) {
+  const channelId = channel.id;
+  const sId = server;
+
   return (
     <div>
-      <span>채널명 : {channel.name}</span>
+      <Link to={{
+      pathname: "/chat",
+      state: {
+        serverId: sId,
+        channel: channelId
+      }
+    }}>채널명 : {channel.name}</Link>
       <p/>
       <span>채널 정보 : {channel.info}</span>
     </div>
@@ -42,7 +51,7 @@ const ChannelList = () => {
     <section>
       <div>
         {info.map((channel, index) => (
-          <Channel channel={channel} key={index} />
+          <Channel channel={channel} key={index} server={serverId} />
         ))}
       </div>
     </section>

@@ -8,6 +8,7 @@ import AuthContext from "./store/auth-context";
 import ServerPage from "./pages/ServerPage";
 import ProfilePage from "./pages/ProfilePage";
 import ChannelPage from "./pages/ChannelPage";
+import ChattingPage from "./pages/ChattingPage";
 
 function App() {
   const authCtx = useContext(AuthContext);
@@ -32,6 +33,10 @@ function App() {
         </Route>
         <Route path="/channel">
           {authCtx.isLoggedIn && <ChannelPage />}
+          {!authCtx.isLoggedIn && <Redirect to="/auth" />}
+        </Route>
+        <Route path="/chat">
+          {authCtx.isLoggedIn && <ChattingPage />}
           {!authCtx.isLoggedIn && <Redirect to="/auth" />}
         </Route>
         <Route path="*">
