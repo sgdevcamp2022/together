@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = {CustomException.class})
     public UserDto createUser(UserDto userDto) {
         if (userRepository.existsUserEntityByEmail(userDto.getEmail())) {
             log.info("이미 가입된 유저");
@@ -113,7 +112,6 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
     public List<FriendDto> getFriendList(String userId) {
         UserEntity userEntity = userRepository.findByUserId(userId)
                 .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
