@@ -19,6 +19,7 @@ import { selectServerId } from "../../features/counter/serverSlice";
 
 
 
+
 function Sidebar() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
@@ -26,6 +27,7 @@ function Sidebar() {
   const [channel, setChannel] = useState([]);
   const serverId = useSelector(selectServerId);
   const [user, setUser] = useState("");
+  const [updated,setupdated] = useState(false);
 
   // 서버에서 채널데이터 가져오기
   useEffect(() => {
@@ -42,13 +44,28 @@ function Sidebar() {
             channel: ch.name,
           }))
         );
+        setupdated(false);
       });
-  }, [serverId, token, userId]);
+  }, [serverId, token, userId, updated]);
 
   const handleAddChannel = () => {
     const channelName = prompt("Enter a new channel name");
+    console.log(channelName);
     if (channelName) {
       // 서버에 채널 생성
+      axios
+      .post(`http://localhost:8000/channel-service/${serverId}/channel`,{
+        name: `${channelName}`,
+        info: "thi is info",
+        type: 1
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        
+      }).then((res)=>{
+        setupdated(true);
+      })
     }
   };
 
@@ -112,7 +129,6 @@ function Sidebar() {
           <p>#{user.userId.substring(0,4)}</p>
             </>
           }
-          
         </div>
         <div className="sidebar__profileIcons">
           <Mic fontSize="large" />
