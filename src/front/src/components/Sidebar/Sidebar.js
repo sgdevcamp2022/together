@@ -25,7 +25,7 @@ function Sidebar() {
   //localStorage에서 사용자 데이터 가져와 프로필 부분에 넣기
   const [channel, setChannel] = useState([]);
   const serverId = useSelector(selectServerId);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState("");
 
   // 서버에서 채널데이터 가져오기
   useEffect(() => {
@@ -43,7 +43,7 @@ function Sidebar() {
           }))
         );
       });
-  }, [serverId]);
+  }, [serverId, token, userId]);
 
   const handleAddChannel = () => {
     const channelName = prompt("Enter a new channel name");
@@ -51,6 +51,8 @@ function Sidebar() {
       // 서버에 채널 생성
     }
   };
+
+
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -63,7 +65,7 @@ function Sidebar() {
       .then((res) => {
         setUser(res.data.user);
       });
-  }, [serverId]);
+  }, [token, userId]);
 
   return (
     <div className="sidebar">
@@ -104,8 +106,13 @@ function Sidebar() {
       <div className="sidebar__profile">
         <Avatar />
         <div className="sidebar__profileInfo">
-          <h3>@{user.name}</h3>
+          {
+            !!!user ? <></> : <>
+            <h3>@{user.name}</h3>
           <p>#{user.userId.substring(0,4)}</p>
+            </>
+          }
+          
         </div>
         <div className="sidebar__profileIcons">
           <Mic fontSize="large" />
