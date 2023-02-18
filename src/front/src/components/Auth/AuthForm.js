@@ -93,6 +93,7 @@ const AuthForm = () => {
       }).then((res)=>{
         // 사용자를 홈 페이지로 redirect.
         history.replace('/');
+        alert("회원가입이 성공했습니다.");
       })
         .catch((err) => {
           alert(err.message);

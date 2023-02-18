@@ -45,7 +45,8 @@ function Dropdown() {
           }))
         );
         setupdated(false);
-      });
+      }).catch((err) => {
+        alert(err.message);});
   }, [token, userId,updated]);
 
   const handleAddServer = () => {
@@ -65,7 +66,9 @@ function Dropdown() {
         
       }).then((res)=>{
         setupdated(true);
-      })
+        alert("서버가 생성되었습니다.");
+      }).catch((err) => {
+        alert(err.message);})
     }
   };
 
