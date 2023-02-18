@@ -6,6 +6,7 @@ import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.security.TokenProvider;
 import com.example.userservice.service.UserService;
+import com.example.userservice.vo.RequestUpdateUser;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseDetailUser;
 import com.example.userservice.vo.ResponseUser;
@@ -66,7 +67,7 @@ public class UserController {
 
     @PostMapping("/user/{id}")
     public ResponseEntity<ResponseUser> updateUser(@PathVariable("id") String userId,
-                                                   @RequestBody RequestUser userInfo) {
+                                                   @RequestBody RequestUpdateUser userInfo) {
         UserDto userDto = userService.updateUser(userId, userInfo);
 
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
