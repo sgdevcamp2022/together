@@ -14,7 +14,6 @@ import {
   selectServerId,
   selectServerName,
 } from "../../features/counter/serverSlice";
-import Message from "../Message/Message";
 import "./Chat.css";
 import ChatHeader from "./ChatHeader";
 
@@ -45,7 +44,7 @@ function Chat() {
         ) : (
           <>
           <div>{roomId}</div>
-            <iframe></iframe>
+            <iframe src="http://127.0.0.1:8000/chat/${channlId}/chat/${userId}"></iframe>
           </>
         )}
       </div>
