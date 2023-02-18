@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import "./Sidebar.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -16,11 +16,13 @@ import { Avatar } from "@mui/material";
 import Dropdown from "../Server/Dropdown";
 import { useSelector } from "react-redux";
 import { selectServerId } from "../../features/counter/serverSlice";
+import AuthContext from "../../store/auth-context";
 
 
 
 
 function Sidebar() {
+  const authCtx = useContext(AuthContext);
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
   //localStorage에서 사용자 데이터 가져와 프로필 부분에 넣기
@@ -28,6 +30,10 @@ function Sidebar() {
   const serverId = useSelector(selectServerId);
   const [user, setUser] = useState("");
   const [updated,setupdated] = useState(false);
+
+const loggoutHandler=()=>{
+  authCtx.logout();
+}
 
   // 서버에서 채널데이터 가져오기
   useEffect(() => {
@@ -69,7 +75,7 @@ function Sidebar() {
     }
   };
 
-
+  
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -121,7 +127,7 @@ function Sidebar() {
         </div>
       </div>
       <div className="sidebar__profile">
-        <Avatar />
+        <Avatar onClick={loggoutHandler}/>
         <div className="sidebar__profileInfo">
           {
             !!!user ? <></> : <>

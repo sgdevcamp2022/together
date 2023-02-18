@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
+import AddIcon from "@mui/icons-material/Add";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useDispatch } from "react-redux";
@@ -13,6 +14,7 @@ function Dropdown() {
   const token = localStorage.getItem("token");
   const [server, setServer] = useState("");
   const [servers, setServers] = useState([]);
+  const [updated,setupdated] = useState(false);
 
   const handleChange = (event: SelectChangeEvent) => {
     setServer(event.target.value);
@@ -42,29 +44,54 @@ function Dropdown() {
             name: item.name,
           }))
         );
+        setupdated(false);
       });
-  }, [token, userId]);
+  }, [token, userId,updated]);
+
+  const handleAddServer = () => {
+    const serverName = prompt("Enter a new server name");
+    console.log(serverName);
+    if (serverName) {
+      // 서버에 채널 생성
+      axios
+      .post(`http://localhost:8000/channel-service/server`,{
+        name: `${serverName}`,
+        info: "this is info",
+        userId: `${userId}`
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        
+      }).then((res)=>{
+        setupdated(true);
+      })
+    }
+  };
 
   return (
-    <FormControl sx={{ m: 1, minWidth: 180 }}>
-      <InputLabel id="demo-simple-select-autowidth-label">
-        Select Server
-      </InputLabel>
-      <Select
-        labelId="demo-simple-select-autowidth-label"
-        id="demo-simple-select-autowidth"
-        value={server}
-        onChange={handleChange}
-        autoWidth
-        label="Server"
-      >
-        {servers.map((item) => (
-          <MenuItem name={item.name} key={item.id} value={item.id}>
-            {item.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <>
+      <FormControl sx={{ m: 1, minWidth: 180 }}>
+        <InputLabel id="demo-simple-select-autowidth-label">
+          Select Server
+        </InputLabel>
+        <Select
+          labelId="demo-simple-select-autowidth-label"
+          id="demo-simple-select-autowidth"
+          value={server}
+          onChange={handleChange}
+          autoWidth
+          label="Server"
+        >
+          {servers.map((item) => (
+            <MenuItem name={item.name} key={item.id} value={item.id}>
+              {item.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <AddIcon onClick={handleAddServer} />
+    </>
   );
 }
 
