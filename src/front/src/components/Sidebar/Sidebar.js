@@ -17,6 +17,7 @@ import Dropdown from "../Server/Dropdown";
 import { useSelector } from "react-redux";
 import { selectServerId } from "../../features/counter/serverSlice";
 import AuthContext from "../../store/auth-context";
+import MyInfo from "./MyInfo";
 
 
 
@@ -127,7 +128,7 @@ const loggoutHandler=()=>{
         </div>
       </div>
       <div className="sidebar__profile">
-        <Avatar onClick={loggoutHandler}/>
+        <MyInfo/>
         <div className="sidebar__profileInfo">
           {
             !!!user ? <></> : <>
@@ -139,7 +140,7 @@ const loggoutHandler=()=>{
         <div className="sidebar__profileIcons">
           <Mic fontSize="large" />
           <Headset fontSize="large" />
-          <Settings fontSize="large" />
+          <Settings fontSize="large" onClick={loggoutHandler}/>
         </div>
       </div>
     </div>
