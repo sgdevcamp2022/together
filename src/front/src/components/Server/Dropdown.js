@@ -3,7 +3,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import { useDispatch } from "react-redux";
 import { setServerInfo } from "../../features/counter/serverSlice";
 import axios from "axios";
@@ -16,7 +16,7 @@ function Dropdown() {
   const [servers, setServers] = useState([]);
   const [updated,setupdated] = useState(false);
 
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleChange = (event) => {
     setServer(event.target.value);
     var obj = servers.find((e) => e.id === event.target.value);
     const serverId = obj.id;
@@ -74,17 +74,16 @@ function Dropdown() {
 
   return (
     <>
-      <FormControl sx={{ m: 1, minWidth: 180 }}>
-        <InputLabel id="demo-simple-select-autowidth-label">
+      <FormControl className="dropdown" sx={{ m: 1, minWidth: 180 }}>
+        <InputLabel id="select-label" style={{ color: "white" }}>
           Select Server
         </InputLabel>
         <Select
-          labelId="demo-simple-select-autowidth-label"
-          id="demo-simple-select-autowidth"
           value={server}
           onChange={handleChange}
           autoWidth
           label="Server"
+          style={{ color: "white" }}
         >
           {servers.map((item) => (
             <MenuItem name={item.name} key={item.id} value={item.id}>

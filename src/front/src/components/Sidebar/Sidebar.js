@@ -101,7 +101,7 @@ const loggoutHandler=()=>{
         <div className="sidebar__channelsHeader">
           <div className="sidebar__header">
             <ExpandMoreIcon />
-            <h4>Text Channels</h4>
+            <h4>Channels</h4>
           </div>
 
           <AddIcon onClick={handleAddChannel} className="sidebar__addChannel" />

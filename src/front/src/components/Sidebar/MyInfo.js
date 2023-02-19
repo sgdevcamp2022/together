@@ -1,7 +1,9 @@
 import { Avatar } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import Modal from "react-modal";
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import './MyInfo.css';
 
 function MyInfo() {
   const userId = localStorage.getItem("userId");
@@ -57,9 +59,10 @@ function MyInfo() {
   return (
     <>
       <Avatar onClick={() => setModalIsOpen(true)} />
-      <Modal isOpen={modalIsOpen} onRequestClose={() => setModalIsOpen(false)}>
+      <Modal className="modal" isOpen={modalIsOpen} onRequestClose={() => setModalIsOpen(false)}>
         <form onSubmit={submitHandler}>
           <h3>내 정보</h3>
+          <CloseIcon className="close" onClick={()=>setModalIsOpen(false)}/>
           <div>
             {mode ? (
               <>

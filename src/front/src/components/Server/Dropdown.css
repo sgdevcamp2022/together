@@ -1,3 +1,7 @@
-*{
-    color: white;
+.dropdown{
+    background-color: white !important;
+}
+
+.dropdown__value{
+    color: white !important;
 }
