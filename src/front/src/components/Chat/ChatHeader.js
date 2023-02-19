@@ -1,6 +1,7 @@
-import { EditLocationRounded, HelpRounded, NotificationAdd, Notifications, PeopleAltRounded, SearchRounded, SendRounded } from "@mui/icons-material";
+import { EditLocationRounded, HelpRounded, Notifications, SearchRounded, SendRounded } from "@mui/icons-material";
 import React from "react";
 import "./ChatHeader.css";
+import FriendList from "./FriendList";
 
 function ChatHeader({channelName}) {
   return (
@@ -14,7 +15,7 @@ function ChatHeader({channelName}) {
       <div className="chatHeader__right">
         <Notifications />
         <EditLocationRounded />
-        <PeopleAltRounded />
+        <FriendList />
 
         <div className="chatHeader__search">
             <input placeholder="Search"/>
