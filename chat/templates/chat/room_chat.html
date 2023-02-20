@@ -1,0 +1,298 @@
+{% extends "chat/base.html" %}
+
+{% block extra-style %}
+<style>
+.chat-message > div {
+    background-color: #3b3b3b;
+    color: #e1e1e1;
+    border-radius: 0.8em;
+    padding: 0.4em;
+    margin: 0.4em 0;
+    display: inline-block;
+    white-space: pre-wrap;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+.chat-message .sender{
+    font-size: 0.8em;
+}
+.chat-message.me {
+    text-align: right;
+}
+.chat-message.me > div {
+    background-color: #1f8cff;
+    color: #fff;
+    text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    {# TODO: 웹소켓으로 실시간 채팅 기능 구현하기 #}
+
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="card" style="height: 600px;">
+                    <div class="card-body overflow-hidden">
+                        <div id="chat_messages" class="w-100 h-100 border-0 overflow-scroll"></div>
+                    </div>
+                    <div class="card-footer">
+                        <form id="message_form">
+                            <input type="text" name="message" class="form-control"
+                                   autofocus autocomplete="off" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card" style="height: 600px;">
+                    <div class="card-header">
+                        접속 유저 <span id="user_count"></span>
+                    </div>
+                    <div class="card-body">
+                        <ul id="user_list"></ul>
+                    </div>
+                    <div class="card-header">
+                        오프라인 유저 <span id="off_user_count"></span>
+                    </div>
+                    <div class="card-body">
+                        <ul id="off_user_list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra-script %}
+<script>
+const handlers = {
+    chat_messages_tag: null,
+    ws: null,
+    retry: 0,
+    current_timestamp: 0,
+    loading: false,
+    online_username_set: new Set(),
+    offline_username_set: new Set(),
+    init() {
+        this.chat_messages_tag = document.querySelector("#chat_messages");
+        document.querySelector("#message_form")
+            .addEventListener("submit", this.onsubmit.bind(this));
+        this.chat_messages_tag.addEventListener("scroll", this.onscroll.bind(this));
+        this.current_timestamp = Date.now();
+    },
+
+    load_messages() {
+        if (this.loading) {
+            return;
+        }
+
+        this.loading = true;
+        const url = window.location.pathname + `/get_chat_history/${this.current_timestamp}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(obj => {
+                    const message = obj.message;
+                    const sender = obj.sender;
+                    const created_at = obj.created_at;
+                    this.append_message2(message, sender, created_at, true);
+                    this.current_timestamp = Math.min(obj.created_at,this.current_timestamp);
+                });
+                this.loading = false;
+            })
+            .catch(error => {
+                console.error("Failed to load messages:", error);
+                this.loading = false;
+            });
+    },
+
+    // Add a new function to check if the user has scrolled to the top
+    onscroll(event) {
+        if (event.target.scrollTop === 0) {
+            // If the user has scrolled to the top, load older messages
+            this.load_messages();
+        }
+    },
+
+    connect(ws_url) {
+        if(this.ws) this.ws.close();
+
+        this.ws = new WebSocket(ws_url || this.ws?.url);
+
+        this.ws.onopen = this.onopen.bind(this);
+        this.ws.onclose = this.onclose.bind(this);
+        this.ws.onerror = this.onerror.bind(this);
+        this.ws.onmessage = this.onmessage.bind(this);
+    },
+    reconnect() {
+        this.connect();
+    },
+    onopen() {
+        console.log("웹소켓 서버와 접속");
+        this.retry = 0;
+        const url = window.location.pathname + `/getonlinemember/`;
+        fetch(url)
+            .then(response => response.json())
+            .then(({ username_list }) => {
+                console.log(username_list);
+                this.online_username_set = new Set([...this.online_username_set, ...username_list]);
+                this.update_user_list();
+            });
+
+        const url2 = window.location.pathname + `/getofflinemember/`;
+        fetch(url2)
+            .then(response => response.json())
+            .then(({ username_list }) => {
+                console.log(username_list);
+                this.offline_username_set = new Set([...this.offline_username_set, ...username_list]);
+                this.update_off_user_list();
+            });
+        
+    },
+    onclose(event) {
+        if(!event.wasClean) {
+            console.error("웹소켓 서버가 죽었거나, 네트워크 장애입니다.");
+            if(this.retry < 3) {
+                this.retry += 1;
+                setTimeout(() => {
+                    this.reconnect();
+                    console.log(`[${this.retry}] 접속 재시도 ...`);
+                }, 1000 * this.retry)
+            }
+            else {
+                console.log("웹소켓 서버에 접속할 수 없습니다. 대기실로 이동합니다.");
+            }
+        }
+    },
+    onerror() {
+        console.log("웹소켓 에러가 발생했습니다. 대기실로 이동합니다.");
+    },
+    onmessage(event) {
+        const message_json = event.data;
+        console.log("메세지 수신 :", message_json);
+
+        const { type, message, sender, created_at } = JSON.parse(message_json);
+        switch(type) {
+            case "chat.message":
+                this.append_message(message, sender, created_at);
+                break;
+                
+            case "chat.user.join":
+                this.online_username_set.add(sender);
+                this.offline_username_set.delete(sender);
+                this.update_user_list();
+                this.update_off_user_list();
+                break;
+
+            case "chat.user.leave":
+                this.online_username_set.delete(sender);
+                this.offline_username_set.add(sender);
+                this.update_user_list();
+                this.update_off_user_list();
+                break;
+
+            default:
+                console.error(`Invalid message type : ${type}`);
+        }
+    },
+    append_message2(message, sender, created_at) {
+        const element = document.createElement("div");
+        element.className = "chat-message";
+        const date = new Date(created_at);
+        let footer = "";
+        let str = location.pathname;
+        let [a,b,c,d,e] = str.split('/');
+        let messagefield = message;
+        if (sender === e ) {
+            element.className += " me";
+        }
+        else if (sender) {
+            footer = `<span class="sender">${sender}</span>\n`;
+        }
+        let created_atfield = `\n<span class="sender">${date}</span>\n`;
+        
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = footer + messagefield + created_atfield;
+        element.appendChild(wrapper);
+
+        this.chat_messages_tag.insertBefore(element, this.chat_messages_tag.firstChild);
+        //this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
+
+    },
+    append_message(message, sender, created_at) {
+        const element = document.createElement("div");
+        element.className = "chat-message";
+        const date = new Date(created_at);
+        let footer = "";
+        let str = location.pathname;
+        let [a,b,c,d,e] = str.split('/');
+        let messagefield = message;
+        if (sender === e ) {
+            element.className += " me";
+        }
+        else if (sender) {
+            footer = `<span class="sender">${sender}</span>\n`;
+        }
+        let created_atfield = `\n<span class="sender">${date}</span>\n`;
+        
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = footer + messagefield + created_atfield;
+        element.appendChild(wrapper);
+
+        this.chat_messages_tag.appendChild(element);
+        this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
+
+    },
+    onsubmit(event) {
+        event.preventDefault();
+
+        const form_data = new FormData(event.target);
+        const props = Object.fromEntries(form_data);
+        event.target.reset();  // reset form
+
+        const { message } = props;
+        console.log("웹소켓으로 전송할 메세지 :", message);
+
+        // this.append_message(message);
+        let str = location.pathname;
+        let [a,b,c,d,e] = str.split('/');
+        this.ws.send(JSON.stringify({
+            type: "chat.message",
+            message: message,
+            sender: e,
+            created_at: Date.now(),
+        }))
+    },
+    
+    update_user_list() {
+        const html = [...this.online_username_set]
+            .map(username => `<li>${username}</li>`)
+            .join('');
+        document.querySelector("#user_list").innerHTML = html;
+
+        document.querySelector("#user_count").textContent =
+            `(${this.online_username_set.size}명)`;
+    },
+
+    update_off_user_list() {
+        const html = [...this.offline_username_set]
+            .map(username => `<li>${username}</li>`)
+            .join('');
+        document.querySelector("#off_user_list").innerHTML = html;
+
+        document.querySelector("#off_user_count").textContent =
+            `(${this.offline_username_set.size}명)`;
+    },
+};
+
+handlers.init();
+
+const protocol = location.protocol === "http:" ? "ws:" : "wss:";
+const ws_url = protocol + "//" + location.host + "/ws" + location.pathname;
+handlers.connect(ws_url);
+handlers.load_messages();
+</script>
+{% endblock %}
