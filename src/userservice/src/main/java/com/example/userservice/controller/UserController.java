@@ -6,10 +6,7 @@ import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.security.TokenProvider;
 import com.example.userservice.service.UserService;
-import com.example.userservice.vo.RequestUpdateUser;
-import com.example.userservice.vo.RequestUser;
-import com.example.userservice.vo.ResponseDetailUser;
-import com.example.userservice.vo.ResponseUser;
+import com.example.userservice.vo.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,8 +132,8 @@ public class UserController {
         return userId;
     }
 
-    @GetMapping("/user/{email}")
-    public String getUserIdByEmail(@PathVariable("email")String email){
+    @GetMapping("id/{email}")
+    public String getUserIdByEmail(@PathVariable("email") String email){
         String userId = userService.getUserByEmail(email).getUserId();
         return userId;
     }

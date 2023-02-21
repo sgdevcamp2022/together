@@ -6,6 +6,7 @@ import com.example.channelservice.repository.ChannelEntity;
 import com.example.channelservice.repository.ServerEntity;
 import com.example.channelservice.repository.ServerRepository;
 import com.example.channelservice.repository.UserInServerEntity;
+import com.example.channelservice.vo.RequestEmail;
 import com.example.channelservice.vo.RequestServer;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -73,6 +74,8 @@ public class ServerServiceImpl implements ServerService{
     @Override
     public ServerDto addUser(Long serverId, String userEmail) {
         ServerEntity server = serverRepository.findById(serverId).orElseThrow(()->new NoSuchElementException());
+        RequestEmail email = new RequestEmail();
+        email.setUserEmail(userEmail);
         String userId = userServiceClient.getUserIdByEmail(userEmail);
         UserInServerEntity user = UserInServerEntity.createUserInServerEntity(userId, server);
 
@@ -87,6 +90,8 @@ public class ServerServiceImpl implements ServerService{
     @Override
     public ServerDto deleteUserInServer(Long serverId, String userEmail) {
         ServerEntity server = serverRepository.findById(serverId).orElseThrow(()->new NoSuchElementException());
+        RequestEmail email = new RequestEmail();
+        email.setUserEmail(userEmail);
         String userId = userServiceClient.getUserIdByEmail(userEmail);
 
         server.deleteUser(userId);

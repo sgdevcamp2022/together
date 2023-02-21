@@ -7,6 +7,7 @@ import Select from "@mui/material/Select";
 import { useDispatch } from "react-redux";
 import { setServerInfo } from "../../features/counter/serverSlice";
 import axios from "axios";
+import AddPersonInServer from "./AddPersonInServer";
 
 function Dropdown() {
   const dispatch = useDispatch();
@@ -92,6 +93,7 @@ function Dropdown() {
           ))}
         </Select>
       </FormControl>
+      <AddPersonInServer server={server}/>
       <AddIcon onClick={handleAddServer} />
     </>
   );
