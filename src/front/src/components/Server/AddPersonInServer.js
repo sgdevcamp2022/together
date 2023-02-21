@@ -25,7 +25,10 @@ function AddPersonInServer({ server }) {
           }
         )
         .then((res) => {
-          prompt.apply("사용자가 추가되었습니다.");
+            alert("사용자 추가에 성공했습니다.");
+        })
+        .catch((err) => {
+          alert(err.message);
         });
     }
   };
