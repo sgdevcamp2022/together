@@ -134,4 +134,10 @@ public class UserController {
         String userId = tokenProvider.getIdFromAccessToken(token);
         return userId;
     }
+
+    @GetMapping("/user/{email}")
+    public String getUserIdByEmail(@PathVariable("email")String email){
+        String userId = userService.getUserByEmail(email).getUserId();
+        return userId;
+    }
 }

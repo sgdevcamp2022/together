@@ -12,8 +12,8 @@ public interface ServerService {
 
     ServerDto updateServer(Long serverId, RequestServer newServer);
 
-    ServerDto addUser(Long serverId, String userId);
+    ServerDto addUser(Long serverId, String userEmail);
 
 
-    ServerDto deleteUserInServer(Long serverId, String userId);
+    ServerDto deleteUserInServer(Long serverId, String userEmail);
 }

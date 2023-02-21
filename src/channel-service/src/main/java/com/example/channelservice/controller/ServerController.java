@@ -92,19 +92,19 @@ public class ServerController {
         return ResponseEntity.status(HttpStatus.OK).body(responseServer);
     }
 
-    @DeleteMapping("server/{id}/kick")
+    @DeleteMapping("server/{id}/{user_email}")
     public ResponseEntity<ResponseServer> deleteUserInServer(@PathVariable("id")Long serverId,
-                                                             @RequestBody RequestUser oldUser) {
-        ServerDto updatedServer = serverService.deleteUserInServer(serverId,oldUser.getReq_user());
+                                                             @PathVariable("user_email")String userEmail) {
+        ServerDto updatedServer = serverService.deleteUserInServer(serverId,userEmail);
 
         ResponseServer responseServer = new ModelMapper().map(updatedServer, ResponseServer.class);
         return ResponseEntity.status(HttpStatus.OK).body(responseServer);
     }
 
-    @PostMapping("server/{id}/join")
+    @PostMapping("server/{id}/{user_email}")
     public ResponseEntity<ResponseServer> addUserInServer(@PathVariable("id")Long serverId,
-                                                          @RequestBody RequestUser newUser) {
-        ServerDto updatedServer = serverService.addUser(serverId, newUser.getReq_user());
+                                                          @PathVariable("user_email")String userEmail) {
+        ServerDto updatedServer = serverService.addUser(serverId, userEmail);
 
         ResponseServer responseServer = new ModelMapper().map(updatedServer, ResponseServer.class);
         return ResponseEntity.status(HttpStatus.OK).body(responseServer);

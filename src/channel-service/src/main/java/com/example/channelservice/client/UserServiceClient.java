@@ -10,4 +10,7 @@ public interface UserServiceClient {
 
     @GetMapping("/token/{atk}")
     String requestParsingToken(@PathVariable("atk") String token);
+
+    @GetMapping("/user/{email}")
+    String getUserIdByEmail(@PathVariable("email")String email);
 }
