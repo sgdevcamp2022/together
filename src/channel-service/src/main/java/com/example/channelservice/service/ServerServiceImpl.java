@@ -5,7 +5,6 @@ import com.example.channelservice.repository.ChannelEntity;
 import com.example.channelservice.repository.ServerEntity;
 import com.example.channelservice.repository.ServerRepository;
 import com.example.channelservice.repository.UserInServerEntity;
-import com.example.channelservice.vo.RequestCreateServer;
 import com.example.channelservice.vo.RequestServer;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -26,9 +25,9 @@ public class ServerServiceImpl implements ServerService{
         this.serverRepository = serverRepository;
     }
     @Override
-    public ServerDto createServer(RequestCreateServer serverDetails) {
+    public ServerDto createServer(RequestServer serverDetails, String userId) {
         ServerEntity serverEntity = ServerEntity.createServer(serverDetails.getName(), serverDetails.getInfo());
-        UserInServerEntity userEntity = UserInServerEntity.createUserInServerEntity(serverDetails.getUserId(), serverEntity);
+        UserInServerEntity userEntity = UserInServerEntity.createUserInServerEntity(userId, serverEntity);
         ChannelEntity defaultChannel = ChannelEntity.createChannel("default",
                 "기본 채널입니다.",
                 0,

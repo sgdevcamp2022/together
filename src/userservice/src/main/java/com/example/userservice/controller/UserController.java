@@ -128,4 +128,10 @@ public class UserController {
 
         return map;
     }
+
+    @GetMapping("/token/{atk}")
+    public String requestParsingToken(@PathVariable("atk")String token){
+        String userId = tokenProvider.getIdFromAccessToken(token);
+        return userId;
+    }
 }

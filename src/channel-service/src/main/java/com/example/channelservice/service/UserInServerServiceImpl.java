@@ -1,5 +1,6 @@
 package com.example.channelservice.service;
 
+import com.example.channelservice.client.UserServiceClient;
 import com.example.channelservice.dto.ServerDto;
 import com.example.channelservice.dto.UserDto;
 import com.example.channelservice.repository.ServerEntity;
@@ -18,11 +19,15 @@ import java.util.NoSuchElementException;
 public class UserInServerServiceImpl implements UserInServerService{
     UserInServerRepository userInServerRepository;
     ServerRepository serverRepository;
+    UserServiceClient userServiceClient;
 
     @Autowired
-    public UserInServerServiceImpl(UserInServerRepository userInServerRepository, ServerRepository serverRepository) {
+    public UserInServerServiceImpl(UserInServerRepository userInServerRepository,
+                                   ServerRepository serverRepository,
+                                   UserServiceClient userServiceClient) {
         this.userInServerRepository = userInServerRepository;
         this.serverRepository = serverRepository;
+        this.userServiceClient = userServiceClient;
     }
 
     @Override
@@ -50,6 +55,12 @@ public class UserInServerServiceImpl implements UserInServerService{
             res.add(new ModelMapper().map(e, UserDto.class));
         });
 
+        return res;
+    }
+
+    @Override
+    public String getUserIdByToken(String atk) {
+        String res = userServiceClient.requestParsingToken(atk);
         return res;
     }
 }

@@ -35,6 +35,9 @@ dependencies {
 
 	// mariaDB
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+
+	//	Feign Client
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
 
 dependencyManagement {

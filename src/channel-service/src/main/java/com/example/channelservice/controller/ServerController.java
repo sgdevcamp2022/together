@@ -35,10 +35,15 @@ public class ServerController {
     }
 
     @PostMapping("/server")
-    public ResponseEntity<ResponseServer> createServer(@RequestBody RequestCreateServer serverDetails) {
+    public ResponseEntity<ResponseServer> createServer(
+            @RequestHeader(value = "Authorization") String atk,
+            @RequestBody RequestServer serverDetails) {
         ModelMapper mapper = new ModelMapper();
+//        Bearer 제거
+        String token = atk.substring(6);
+        String userId = userInServerService.getUserIdByToken(token);
 
-        ServerDto createdServer = serverService.createServer(serverDetails);
+        ServerDto createdServer = serverService.createServer(serverDetails, userId);
 
         ResponseServer responseServer = mapper.map(createdServer, ResponseServer.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseServer);

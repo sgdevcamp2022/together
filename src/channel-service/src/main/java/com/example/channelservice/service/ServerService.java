@@ -1,11 +1,10 @@
 package com.example.channelservice.service;
 
 import com.example.channelservice.dto.ServerDto;
-import com.example.channelservice.vo.RequestCreateServer;
 import com.example.channelservice.vo.RequestServer;
 
 public interface ServerService {
-    ServerDto createServer(RequestCreateServer serverDetails);
+    ServerDto createServer(RequestServer serverDetails, String userId);
 //    Iterable<ServerEntity> getServersByUserId(String userId);
     ServerDto getServerById(Long serverId);
 
