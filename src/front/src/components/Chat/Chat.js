@@ -16,6 +16,8 @@ import {
 } from "../../features/counter/serverSlice";
 import "./Chat.css";
 import ChatHeader from "./ChatHeader";
+import VideoCall from "../VideoCall/VideoCall";
+import { selectConnectValue } from "../../features/counter/connectSlice";
 
 function Chat() {
   //   iframe으로 보낼 메세지
@@ -28,26 +30,39 @@ function Chat() {
 
   const userId = localStorage.getItem("userId");
 
+  const connect = useSelector((state) => state.connect.value);
+
   // 채널 id가 변경되면 채팅이 변경
   useEffect(() => {
     setRoomId("channelId+serverId+userId");
+
+    console.log("connect", connect);
+
     return () => {};
   }, [channelId]);
+
+  let ConditionalComponent;
+
+  if (!!!channelId) {
+    ConditionalComponent = <></>;
+  } else {
+    if (connect == true) {
+      ConditionalComponent = <VideoCall />;
+    } else if (connect == false) {
+      ConditionalComponent = (
+        <>
+          <div>{roomId}</div>
+          <iframe src="http://127.0.0.1:8000/chat/${channlId}/chat/${userId}"></iframe>
+        </>
+      );
+    }
+  }
 
   return (
     <div className="chat">
       <ChatHeader channelName={channelName} />
 
-      <div className="chat__messages">
-        {!!!channelId ? (
-          <></>
-        ) : (
-          <>
-          <div>{roomId}</div>
-            <iframe src="http://127.0.0.1:8000/chat/${channlId}/chat/${userId}"></iframe>
-          </>
-        )}
-      </div>
+      <div className="chat__messages">{ConditionalComponent}</div>
       <div className="chat__input">
         <AddCircle fontSize="large" />
         <form>
