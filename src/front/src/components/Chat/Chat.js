@@ -34,12 +34,10 @@ function Chat() {
 
   // 채널 id가 변경되면 채팅이 변경
   useEffect(() => {
-    setRoomId("channelId+serverId+userId");
-
-    console.log("connect", connect);
+    setRoomId(`http://127.0.0.1:8001/chat/${channelId}/chat/${userId}`);
 
     return () => {};
-  }, [channelId]);
+  }, [channelId,userId]);
 
   let ConditionalComponent;
 
@@ -61,24 +59,16 @@ function Chat() {
   return (
     <div className="chat">
       <ChatHeader channelName={channelName} />
-
-      <div className="chat__messages">{ConditionalComponent}</div>
-      <div className="chat__input">
-        <AddCircle fontSize="large" />
-        <form>
-          <input placeholder={`Message #TestChannel`} />
-          <button className="chat__inputButton" type="submit">
-            Send Message
-          </button>
-        </form>
-        <div className="chat__inputIcons">
-          <CardGiftcard fontSize="large" />
-          <GifTwoTone fontSize="large" />
-          <EmojiEmotions fontSize="large" />
-        </div>
+      <div className="chat__messages">
+        {!!!channelId ? (
+          <></>
+        ) : (
+          <>
+            <iframe title="No content" height="650" src={roomId} width="1200"></iframe>
+          </>
+        )}
       </div>
     </div>
   );
 }
-
 export default Chat;
