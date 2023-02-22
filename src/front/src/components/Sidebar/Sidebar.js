@@ -14,13 +14,14 @@ import {
 } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
 import Dropdown from "../Server/Dropdown";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectServerId } from "../../features/counter/serverSlice";
 import AuthContext from "../../store/auth-context";
 import MyInfo from "./MyInfo";
-
-
-
+import {
+  selectConnectValue,
+  setConnect,
+} from "../../features/counter/connectSlice";
 
 function Sidebar() {
   const authCtx = useContext(AuthContext);
@@ -30,11 +31,13 @@ function Sidebar() {
   const [channel, setChannel] = useState([]);
   const serverId = useSelector(selectServerId);
   const [user, setUser] = useState("");
-  const [updated,setupdated] = useState(false);
+  const [updated, setupdated] = useState(false);
+  const connect = useSelector((state) => state.connect.value);
+  const dispatch = useDispatch();
 
-const loggoutHandler=()=>{
-  authCtx.logout();
-}
+  const loggoutHandler = () => {
+    authCtx.logout();
+  };
 
   // 서버에서 채널데이터 가져오기
   useEffect(() => {
@@ -61,22 +64,24 @@ const loggoutHandler=()=>{
     if (channelName) {
       // 서버에 채널 생성
       axios
-      .post(`http://localhost:8000/channel-service/${serverId}/channel`,{
-        name: `${channelName}`,
-        info: "thi is info",
-        type: 1
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        
-      }).then((res)=>{
-        setupdated(true);
-      })
+        .post(
+          `http://localhost:8000/channel-service/${serverId}/channel`,
+          {
+            name: `${channelName}`,
+            info: "thi is info",
+            type: 1,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((res) => {
+          setupdated(true);
+        });
     }
   };
-
-  
 
   // 사용자 정보 가져오기
   useEffect(() => {
@@ -118,29 +123,39 @@ const loggoutHandler=()=>{
       <div className="sidebar__voice">
         <SignalCellularAlt className="sidebar__voiceIcon" fontSize="large" />
         <div className="sidebar__voiceInfo">
-          <h3>Voice Connected</h3>
+          {connect ? <h3>connected</h3> : <h3>unconnected</h3>}
           <p>Stream</p>
         </div>
 
         <div className="sidebar__voiceIcons">
           <InfoOutlined />
-          <Call />
+          <Call
+            onClick={() =>
+              dispatch(
+                setConnect({
+                  value: !connect,
+                })
+              )
+            }
+          />
         </div>
       </div>
       <div className="sidebar__profile">
-        <MyInfo/>
+        <MyInfo />
         <div className="sidebar__profileInfo">
-          {
-            !!!user ? <></> : <>
-            <h3>@{user.name}</h3>
-          <p>#{user.userId.substring(0,4)}</p>
+          {!!!user ? (
+            <></>
+          ) : (
+            <>
+              <h3>@{user.name}</h3>
+              <p>#{user.userId.substring(0, 4)}</p>
             </>
-          }
+          )}
         </div>
         <div className="sidebar__profileIcons">
           <Mic fontSize="large" />
           <Headset fontSize="large" />
-          <Settings fontSize="large" onClick={loggoutHandler}/>
+          <Settings fontSize="large" onClick={loggoutHandler} />
         </div>
       </div>
     </div>
