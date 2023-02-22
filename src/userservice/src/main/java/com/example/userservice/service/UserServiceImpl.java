@@ -8,6 +8,7 @@ import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.FriendEntity;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.repository.UserRepository;
+import com.example.userservice.vo.RequestUpdateUser;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseDetailUser;
 import com.example.userservice.vo.ResponseServer;
@@ -82,13 +83,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(String userId, RequestUser userInfo) {
+    public UserDto updateUser(String userId, RequestUpdateUser userInfo) {
         UserEntity userEntity = userRepository.findByUserId(userId)
                 .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         userEntity.setName(userInfo.getName());
-        userEntity.setEmail(userInfo.getEmail());
-        userEntity.setEncryptedPwd(userInfo.getPwd());
+        userEntity.setEncryptedPwd(passwordEncoder.encode(userInfo.getPwd()));
 
         userRepository.save(userEntity);
 

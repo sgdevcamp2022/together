@@ -1,15 +1,17 @@
 package com.example.userservice.repository;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "friend")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FriendEntity extends BaseEntity {
     @Id
@@ -21,19 +23,27 @@ public class FriendEntity extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "tbr_id")
+    @JsonIgnore
+    private UserEntity user;
 
     @Builder
     public FriendEntity(String name,
-                         String email){
+                         String email,
+                        UserEntity user){
         this.name = name;
         this.email = email;
+        this.user = user;
     }
 
     public static FriendEntity addFriend(String name,
-                                         String email) {
+                                         String email,
+                                         UserEntity user) {
         return FriendEntity.builder()
                 .name(name)
                 .email(email)
+                .user(user)
                 .build();
     }
 }

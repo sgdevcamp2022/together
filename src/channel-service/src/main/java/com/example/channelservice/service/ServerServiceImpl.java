@@ -1,11 +1,12 @@
 package com.example.channelservice.service;
 
+import com.example.channelservice.client.UserServiceClient;
 import com.example.channelservice.dto.ServerDto;
 import com.example.channelservice.repository.ChannelEntity;
 import com.example.channelservice.repository.ServerEntity;
 import com.example.channelservice.repository.ServerRepository;
 import com.example.channelservice.repository.UserInServerEntity;
-import com.example.channelservice.vo.RequestCreateServer;
+import com.example.channelservice.vo.RequestEmail;
 import com.example.channelservice.vo.RequestServer;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -18,17 +19,20 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class ServerServiceImpl implements ServerService{
     ServerRepository serverRepository;
+    UserServiceClient userServiceClient;
 
     ModelMapper mapper = new ModelMapper();
     @Autowired
-    public ServerServiceImpl(ServerRepository serverRepository){
+    public ServerServiceImpl(ServerRepository serverRepository,
+                             UserServiceClient userServiceClient){
 
         this.serverRepository = serverRepository;
+        this.userServiceClient = userServiceClient;
     }
     @Override
-    public ServerDto createServer(RequestCreateServer serverDetails) {
+    public ServerDto createServer(RequestServer serverDetails, String userId) {
         ServerEntity serverEntity = ServerEntity.createServer(serverDetails.getName(), serverDetails.getInfo());
-        UserInServerEntity userEntity = UserInServerEntity.createUserInServerEntity(serverDetails.getUserId(), serverEntity);
+        UserInServerEntity userEntity = UserInServerEntity.createUserInServerEntity(userId, serverEntity);
         ChannelEntity defaultChannel = ChannelEntity.createChannel("default",
                 "기본 채널입니다.",
                 0,
@@ -68,8 +72,11 @@ public class ServerServiceImpl implements ServerService{
     }
 
     @Override
-    public ServerDto addUser(Long serverId, String userId) {
+    public ServerDto addUser(Long serverId, String userEmail) {
         ServerEntity server = serverRepository.findById(serverId).orElseThrow(()->new NoSuchElementException());
+        RequestEmail email = new RequestEmail();
+        email.setUserEmail(userEmail);
+        String userId = userServiceClient.getUserIdByEmail(userEmail);
         UserInServerEntity user = UserInServerEntity.createUserInServerEntity(userId, server);
 
         server.addUser(user);
@@ -81,8 +88,12 @@ public class ServerServiceImpl implements ServerService{
     }
 
     @Override
-    public ServerDto deleteUserInServer(Long serverId, String userId) {
+    public ServerDto deleteUserInServer(Long serverId, String userEmail) {
         ServerEntity server = serverRepository.findById(serverId).orElseThrow(()->new NoSuchElementException());
+        RequestEmail email = new RequestEmail();
+        email.setUserEmail(userEmail);
+        String userId = userServiceClient.getUserIdByEmail(userEmail);
+
         server.deleteUser(userId);
 
         serverRepository.save(server);

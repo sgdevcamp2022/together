@@ -28,9 +28,9 @@ public class FriendServiceImpl implements FriendService {
                 .orElseThrow(()-> new CustomException(ErrorCode.CANNOT_FIND_USER));
 
         FriendEntity friend = FriendEntity.addFriend(followerInfo.getName(),
-                followerInfo.getEmail());
-
+                followerInfo.getEmail(),myInfo);
         myInfo.addFriend(friend);
+
         friendRepository.save(friend);
         userRepository.save(myInfo);
     }
@@ -43,6 +43,9 @@ public class FriendServiceImpl implements FriendService {
         FriendEntity friendEntity = friendRepository.findByEmail(followerMail)
                 .orElseThrow(()->new CustomException(ErrorCode.CANNOT_FIND_USER));
 
+        friendEntity.setUser(null);
+        userEntity.deleteFriend(followerMail);
         friendRepository.delete(friendEntity);
+        userRepository.save(userEntity);
     }
 }

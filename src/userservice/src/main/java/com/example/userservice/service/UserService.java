@@ -3,6 +3,7 @@ package com.example.userservice.service;
 import com.example.userservice.dto.FriendDto;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.repository.UserEntity;
+import com.example.userservice.vo.RequestUpdateUser;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseDetailUser;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +31,7 @@ public interface UserService extends UserDetailsService {
      * @return
      * userID와 변경할 유저 정보로 유저 정보 업데이트
      */
-    UserDto updateUser(String userId, RequestUser userInfo);
+    UserDto updateUser(String userId, RequestUpdateUser userInfo);
 
     void deleteUser(String userId);
 

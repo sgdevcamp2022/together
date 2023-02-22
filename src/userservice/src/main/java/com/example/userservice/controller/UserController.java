@@ -6,9 +6,7 @@ import com.example.userservice.exception.ErrorCode;
 import com.example.userservice.repository.UserEntity;
 import com.example.userservice.security.TokenProvider;
 import com.example.userservice.service.UserService;
-import com.example.userservice.vo.RequestUser;
-import com.example.userservice.vo.ResponseDetailUser;
-import com.example.userservice.vo.ResponseUser;
+import com.example.userservice.vo.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +64,7 @@ public class UserController {
 
     @PostMapping("/user/{id}")
     public ResponseEntity<ResponseUser> updateUser(@PathVariable("id") String userId,
-                                                   @RequestBody RequestUser userInfo) {
+                                                   @RequestBody RequestUpdateUser userInfo) {
         UserDto userDto = userService.updateUser(userId, userInfo);
 
         ResponseUser returnValue = new ModelMapper().map(userDto, ResponseUser.class);
@@ -126,5 +124,17 @@ public class UserController {
         map.put("refreshToken", refreshToken);
 
         return map;
+    }
+
+    @GetMapping("/token/{atk}")
+    public String requestParsingToken(@PathVariable("atk")String token){
+        String userId = tokenProvider.getIdFromAccessToken(token);
+        return userId;
+    }
+
+    @GetMapping("id/{email}")
+    public String getUserIdByEmail(@PathVariable("email") String email){
+        String userId = userService.getUserByEmail(email).getUserId();
+        return userId;
     }
 }
